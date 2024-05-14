@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import routerEnviroment from './routes/routesEnvironment.js';
+import routerApiProgramCompetence from './routes/routesApiProgramsCompetences.js';
 
 //Inicilization
 const app = express();
@@ -24,6 +25,7 @@ app.get('/login', (req, res) => {
 });
 
 app.use(routerEnviroment);
+app.use(routerApiProgramCompetence);
 
 //Public files
 app.use(express.static(join(__dirname, 'public')));
