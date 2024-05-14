@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import jwt from 'jwt';
+import routerEnviroment from './routes/routesEnvironment.js';
 
 //Inicilization
 const app = express();
@@ -19,10 +19,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 //Routes
-app.get('/', (req, res) => {
+app.get('/login', (req, res) => {
   res.json({'Messagge':'Online'});
 });
 
+app.use(routerEnviroment);
 
 //Public files
 app.use(express.static(join(__dirname, 'public')));
