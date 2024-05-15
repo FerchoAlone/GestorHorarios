@@ -4,7 +4,9 @@ import { fileURLToPath } from 'url';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cors from 'cors';
-
+import routerEnviroment from './routes/routesEnvironment.js';
+import routerApiProgramCompetence from './routes/routesApiProgramsCompetences.js';
+import routerLogin from './routes/routeLogin.js';
 
 //Inicilization
 const app = express();
@@ -19,10 +21,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 //Routes
-app.get('/', (req, res) => {
+app.get('/login', (req, res) => {
   res.json({'Messagge':'Online'});
 });
 
+app.use(routerEnviroment);
+app.use(routerApiProgramCompetence);
+app.use(routerLogin);
 
 //Public files
 app.use(express.static(join(__dirname, 'public')));
