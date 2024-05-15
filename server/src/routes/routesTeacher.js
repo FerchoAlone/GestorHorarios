@@ -1,7 +1,7 @@
-import {Routes} from "express";
-import { getAllTeachers, createTeacher, getActiveTeachers, getTeacherById, updateTeacher, changeTeacherStatus } from "../services/serviceTeacher"; 
+import {Router} from "express";
+import { getAllTeachers, createTeacher, getActiveTeachers, getTeacherById, updateTeacher, changeTeacherStatus } from "../services/serviceTeacher.js"; 
 
-const routerTeacher = Routes();
+const routerTeacher = Router();
 const pathBase = '/teacher/';
 
 routerTeacher.get(pathBase + "getAll", async (req, res) => {
