@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import jwt from 'jwt';
+
 
 //Inicilization
 const app = express();
