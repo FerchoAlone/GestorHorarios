@@ -4,7 +4,8 @@ import { fileURLToPath } from 'url';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import jwt from 'jwt';
+import routerAcademicPeriod from './routes/routesAcademicPeriod.js';
+
 
 //Inicilization
 const app = express();
@@ -18,11 +19,13 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
+
 //Routes
 app.get('/', (req, res) => {
   res.json({'Messagge':'Online'});
 });
 
+app.use(routerAcademicPeriod);
 
 //Public files
 app.use(express.static(join(__dirname, 'public')));
