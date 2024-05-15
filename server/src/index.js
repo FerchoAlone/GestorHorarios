@@ -7,6 +7,9 @@ import cors from 'cors';
 import routerEnviroment from './routes/routesEnvironment.js';
 import routerApiProgramCompetence from './routes/routesApiProgramsCompetences.js';
 import routerLogin from './routes/routeLogin.js';
+import routerAcademicPeriod from './routes/routesAcademicPeriod.js';
+import routerTeacher from './routes/routesTeacher.js';
+
 
 //Inicilization
 const app = express();
@@ -20,6 +23,7 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
+
 //Routes
 app.get('/login', (req, res) => {
   res.json({'Messagge':'Online'});
@@ -28,6 +32,9 @@ app.get('/login', (req, res) => {
 app.use(routerEnviroment);
 app.use(routerApiProgramCompetence);
 app.use(routerLogin);
+app.use(routerAcademicPeriod);
+app.use(routerTeacher);
+
 
 //Public files
 app.use(express.static(join(__dirname, 'public')));
