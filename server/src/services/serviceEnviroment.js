@@ -116,6 +116,15 @@ export const getEnvironmentById = async (id) => {
   return {ENVIRONMENT_ID:-1};
 };
 
+export const getEnvironmentByName = async (name) => {
+  const [response] = await pool.query(
+    "SELECT * FROM environment WHERE ENVIRONMENT_NAME = ?",
+    [name]
+  );
+  if(response[0])return response[0];
+  return {ENVIRONMENT_NAME:-1};
+};
+
 /**
  * Obtiene todos los ambientes con estado activo (ENVIRONMENT_STATUS=1)
  * @returns response: Array con objetos que guardan la información  de los ambientes

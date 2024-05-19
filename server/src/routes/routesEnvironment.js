@@ -6,6 +6,7 @@ import {
   changeStateEnvironment,
   getEnvironmentById,
   getAllEnvironmentsActived,
+  getEnvironmentByName,
 } from "../services/serviceEnviroment.js";
 
 const routerEnviroment = Router();
@@ -74,6 +75,17 @@ routerEnviroment.get(pathBase + "getEnvironmentById", async (req, res) => {
  */
 routerEnviroment.get(pathBase + "getEnvironmentsActived", async (req, res) => {
   const enviroments = await getAllEnvironmentsActived();
+  res.send(enviroments);
+});
+
+/**
+ * Obtiene el ambiente con nombre pasado en el request body
+ * @returns {ENVIRONMENT_ID,ENVIRONMENT_NAME,ENVIRONMENT_LOCATION,ENVIRONMENT_CAPACITY,ENVIRONMENT_STATUS, ENVIRONMENT_TYPE}
+ * Informacion del ambiente, ENVIRONMENT_NAME=-1 si el ambiente no existe
+ */
+routerEnviroment.get(pathBase + "getEnvironmentByName", async (req, res) => {
+  const { name } = req.body;
+  const enviroments = await getEnvironmentByName(name);
   res.send(enviroments);
 });
 
