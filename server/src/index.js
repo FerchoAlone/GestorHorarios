@@ -9,6 +9,7 @@ import routerApiProgramCompetence from './routes/routesApiProgramsCompetences.js
 import routerLogin from './routes/routeLogin.js';
 import routerAcademicPeriod from './routes/routesAcademicPeriod.js';
 import routerTeacher from './routes/routesTeacher.js';
+import routerSchedule from './routes/routesSchedule.js';
 
 
 //Inicilization
@@ -34,6 +35,7 @@ app.use(routerApiProgramCompetence);
 app.use(routerLogin);
 app.use(routerAcademicPeriod);
 app.use(routerTeacher);
+app.use(routerSchedule);
 
 
 //Public files

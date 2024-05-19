@@ -5,7 +5,7 @@ import {
   createTimeSlot,
   updateTimeSlot,
   deleteTimeSlot
-} from "../services/serviceSchedule.js";
+} from "../services/facadeSchedule.js";
 
 const routerSchedule = Router();
 const pathBase = "/schedule/";
@@ -13,8 +13,8 @@ const pathBase = "/schedule/";
 routerSchedule.get(
   pathBase + "getScheduleByTeacherAndPeriod",
   async (req, res) => {
-    const { period_id, teacher_id } = req.body;
-    const schedule = await getScheduleByTeacherAndPeriod(period_id, teacher_id);
+    const { PERIOD_ID, TEACHER_ID } = req.body;
+    const schedule = await getScheduleByTeacherAndPeriod(PERIOD_ID, TEACHER_ID);
     res.send(schedule);
   }
 );
@@ -22,31 +22,33 @@ routerSchedule.get(
 routerSchedule.get(
   pathBase + "getScheduleByPeriodProgramEnvironment",
   async (req, res) => {
-    const { period_id, program_id, environment_id } = req.body;
+    const { PERIOD_ID, PROGRAM_ID, ENVIRONMENT_ID } = req.body;
     const schedule = await getScheduleByPeriodProgramEnvironment(
-      period_id,
-      program_id,
-      environment_id
+      PERIOD_ID,
+      PROGRAM_ID,
+      ENVIRONMENT_ID
     );
     res.send(schedule);
   }
 );
 
 routerSchedule.post(pathBase + "createTimeSlot", async (req, res) => {
-  const { timeSlot } = req.body;
+  const {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION} = req.body;
+  const timeSlot = {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION};
   const response = await createTimeSlot(timeSlot);
   res.send(response);
 });
 
 routerSchedule.post(pathBase + "updateTimeSlot", async (req, res) => {
-  const { timeSlot } = req.body;
+   const {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION,SCHEDULE_ID} = req.body;
+  const timeSlot = {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION,SCHEDULE_ID};
   const response = await updateTimeSlot(timeSlot);
   res.send(response);
 });
 
 routerSchedule.delete(pathBase + "deleteTimeSlot", async (req, res) => {
-    const { schedule_id } = req.body;
-    const response = await deleteTimeSlot(schedule_id);
+    const { SCHEDULE_ID } = req.body;
+    const response = await deleteTimeSlot(SCHEDULE_ID);
     res.send(response);
 });
 export default routerSchedule;
