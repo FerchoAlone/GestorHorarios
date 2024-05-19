@@ -117,12 +117,12 @@ export const getEnvironmentById = async (id) => {
 };
 
 export const getEnvironmentByName = async (name) => {
+  const stringQuery = '%'+name+'%';
   const [response] = await pool.query(
-    "SELECT * FROM environment WHERE ENVIRONMENT_NAME = ?",
-    [name]
+    "SELECT * FROM environment WHERE ENVIRONMENT_NAME LIKE ?",
+    [stringQuery]
   );
-  if(response[0])return response[0];
-  return {ENVIRONMENT_NAME:-1};
+  return response;
 };
 
 /**

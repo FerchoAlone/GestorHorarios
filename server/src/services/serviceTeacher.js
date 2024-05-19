@@ -122,10 +122,10 @@ export const getActiveTeachers = async () => {
 };
 
 export const getTeacherByName = async (name) => {
+  const stringQuery = '%'+name+'%';
   const [response] = await pool.query(
-    "SELECT * FROM teacher WHERE TEACHER_FIRSTNAME = ?",
-    [name]
+    "SELECT * FROM teacher WHERE TEACHER_FIRSTNAME LIKE ?",
+    [stringQuery]
   );
-  if(response[0]) return response[0];
-    return {TEACHER_FIRSTNAME:-1};
+  return response;
 };
