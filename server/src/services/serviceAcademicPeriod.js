@@ -49,8 +49,6 @@ export const changeAcademicPeriod = async (chang)=>{
     return {state: "SUCCESS", message: "Se cambio el estado con exito :D "};
     }
     catch(e){
-        if(e.errno== 1048 ) return {state: "NULL", message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."};
-        if(e.errno== 1062 ) return {state: "DUPLICATE", message: "Ya existe un periodo academico con ese identificador (ID)"};
         return {state: "ERROR", message: "Ha ocurrido un error al actualizar el estado del periodo academico. Estado del periodo academico NO actualizado"};
     }
 };

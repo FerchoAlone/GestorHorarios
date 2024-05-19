@@ -27,9 +27,13 @@ export const verifyCredentials = async (credentials) => {
       process.env.SECRETWORD,
       { expiresIn: process.env.EXPIRESTOKEN }
     );
-    return { state: "SUCCESS", message: "Inicio de sesión exitoso", token:token ,type:user.USER_TYPE};
+    return {
+      state: "SUCCESS",
+      message: "Inicio de sesión exitoso",
+      token: token,
+      rol: user.USER_TYPE,
+    };
   } catch (error) {
-    console.error("Error al iniciar sesión:", error);
     return { state: "ERROR", message: "Error al iniciar sesión", token: null };
   }
 };

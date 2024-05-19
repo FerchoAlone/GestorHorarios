@@ -47,7 +47,7 @@ export const createTeacher = async (teacher) => {
 
     return {
       status: "SUCCESS",
-      message: "Profesro creado exitosamente.",
+      message: "Profesor creado exitosamente.",
       data: response
     };
   } catch (e) {

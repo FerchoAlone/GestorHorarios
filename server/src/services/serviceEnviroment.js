@@ -14,13 +14,13 @@ export const getAllEnvironments = async () => {
  * @param {id,name,location,capacity,status,type} env Objeto con la información del ambiente
  * @returns {state,message} Retorna un objeto donde se guarda el estado de la operacion (SUCCESS o ERROR) y un mensaje
  */
-export const addEnvironment = async (env) => {
+export const createEnvironment = async (env) => {
   try {
     const response = await pool.query(
       "INSERT INTO environment (ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_LOCATION, ENVIRONMENT_CAPACITY, ENVIRONMENT_STATUS, ENVIRONMENT_TYPE) VALUES (?, ?, ?, ?, ?, ?)",
       [env.id, env.name, env.location, env.capacity, env.status, env.type]
     );
-    return { state: "SUCCESS", message: "Ambiente agregado exitosamente" };
+    return { state: "SUCCESS", message: "Ambiente creado exitosamente" };
   } catch (e) {
     if (e.errno == 1062) {
       return {

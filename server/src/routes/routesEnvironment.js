@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   getAllEnvironments,
-  addEnvironment,
+  createEnvironment,
   updateEnvironment,
   changeStateEnvironment,
   getEnvironmentById,
@@ -12,10 +12,6 @@ import {
 const routerEnviroment = Router();
 const pathBase = "/environment/";
 
-/*TODO IMPLEMENTAR EL VERIFICADOR TOKEN
-const vefToken =(token)=>{
-    return token;
-}*/
 
 /**
  * Obtiene todos los ambientes por medio del servicio de ambientes
@@ -30,10 +26,10 @@ routerEnviroment.get(pathBase + "getAll", async (req, res) => {
  * Agrega un ambiente 
  * @returns {state,message} Retorna un objeto donde se guarda el estado de la operacion (SUCCESS o ERROR) y un mensaje
  */
-routerEnviroment.post(pathBase + "addEnvironment", async (req, res) => {
+routerEnviroment.post(pathBase + "createEnvironment", async (req, res) => {
   const { id, name, location, capacity, status, type } = req.body;
   const env = { id, name, location, capacity, status, type };
-  const response = await addEnvironment(env);
+  const response = await createEnvironment(env);
   res.send(response);
 });
 
