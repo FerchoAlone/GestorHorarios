@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyCredentials, verifyToken } from "../services/serviceLogin.js";
+import { verifyCredentials} from "../services/serviceLogin.js";
 const routerLogin = Router();
 
 
@@ -15,11 +15,11 @@ routerLogin.post('/login', async (req, res) => {
     res.send(response);
 });
 
-routerLogin.post('/vefToken', async (req, res) => {
+/*routerLogin.post('/vefToken', async (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
     const response = await verifyToken(token);
     res.send(response);
-});
+});*/
 
 
 

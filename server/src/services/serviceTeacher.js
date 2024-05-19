@@ -20,9 +20,8 @@ export const createTeacher = async (teacher) => {
     connection = await pool.getConnection();
     connection.beginTransaction();
     const [response] = await connection.query(
-      "INSERT INTO teacher (TEACHER_ID, TEACHER_FIRSTNAME, TEACHER_LASTNAME, TEACHER_IDTYPE, TEACHER_IDNUMBER, TEACHER_TYPE,TEACHER_CONTRACTTYPE,TEACHER_AREA,TEACHER_STATUS) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO teacher (TEACHER_FIRSTNAME, TEACHER_LASTNAME, TEACHER_IDTYPE, TEACHER_IDNUMBER, TEACHER_TYPE,TEACHER_CONTRACTTYPE,TEACHER_AREA,TEACHER_STATUS) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)",
       [
-        teacher.id,
         teacher.name,
         teacher.lastname,
         teacher.typeIdentification,
@@ -35,12 +34,12 @@ export const createTeacher = async (teacher) => {
     );
 
 
-    const userLogin = teacher.name.slice(0, 3).toLowerCase() + teacher.id;
+    const userLogin = teacher.name.slice(0, 3).toLowerCase() + response.insertId;
     const userPassword = "12345678";
 
     const [userResponse] = await connection.query(
-      "INSERT INTO user (USER_ID, TEACHER_ID, USER_LOGIN, USER_PASSWORD, USER_TYPE) VALUES (?, ?, ?, ?, ?)",
-      [teacher.id,teacher.id, userLogin, userPassword, "DOCENTE"]
+      "INSERT INTO user (TEACHER_ID, USER_LOGIN, USER_PASSWORD, USER_TYPE) VALUES ( ?, ?, ?, ?)",
+      [response.insertId, userLogin, userPassword, "DOCENTE"]
     );
 
     await connection.commit();
@@ -48,60 +47,54 @@ export const createTeacher = async (teacher) => {
     return {
       status: "SUCCESS",
       message: "Profesor creado exitosamente.",
-      data: response
     };
   } catch (e) {
+    if (connection) {
+      connection.release();
+    }
     if (e.errno == 1062) {
       return {
-        status: "DUPLICATE",
+        status: "ERROR",
         message: "Ya existe un profesor con ese identificador (ID)",
       };
     };
     if (e.errno == 1048){
       return {
-        status: "NULL",
+        status: "ERROR",
         message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."
       };
     };
     return {
-      status: "error",
-      message: e.message
+      status: "ERROR",
+      message: "Ah ocurrido un error creando al docente, docente NO creado"
     };
-  } finally {
-    if (connection) {
-      connection.release();
-    } // Liberar la conexión
   }
 };
 
 export const updateTeacher = async (teacher) => {
   try {
     const response = await pool.query(
-      "UPDATE teacher SET TEACHER_ID = ?, TEACHER_FIRSTNAME = ?, TEACHER_LASTNAME = ?, TEACHER_IDTYPE = ?, TEACHER_IDNUMBER = ?, TEACHER_TYPE = ?, TEACHER_CONTRACTTYPE = ?, TEACHER_AREA = ?, TEACHER_STATUS = ? WHERE TEACHER_ID = ?",
+      "UPDATE teacher SET TEACHER_FIRSTNAME = ?, TEACHER_LASTNAME = ?, TEACHER_CONTRACTTYPE = ?, TEACHER_AREA = ?, TEACHER_STATUS = ? WHERE TEACHER_ID = ?",
       [
-        teacher.id,
         teacher.name,
         teacher.lastname,
-        teacher.typeIdentification,
-        teacher.identification,
-        teacher.type,
         teacher.typeContract,
         teacher.area,
         teacher.status,
-        teacher.id,
+        teacher.id
       ]
     );
     return { state: "SUCCESS", message: "Profesor actualizado exitosamente" };
   } catch (e) {
     if (e.errno == 1062){
       return {
-        state: "DUPLICATE",
+        state: "ERROR",
         message: "Ya existe un profesor con ese identificador (ID)",
       };
     };
     if (e.errno == 1048){
       return {
-        state: "NULL",
+        state: "ERROR",
         message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."
       };
     };
@@ -117,18 +110,6 @@ export const changeTeacherStatus = async (id, status) => {
     );
     return { state: "SUCCESS", message: "Estado del profesor actualizado exitosamente" };
   } catch (e) {
-    if (e.errno == 1062) {
-      return {
-        state: "DUPLICATE",
-        message: "Ya existe un profesor con ese identificador (ID)",
-      };
-    };
-    if (e.errno == 1048) {
-      return {
-        state: "NULL",
-        message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."
-      };
-    };
     return { state: "ERROR", message: "Ha ocurrido un error al actualizar el estado del profesor. Estado del profesor NO actualizado" };
   }
 };

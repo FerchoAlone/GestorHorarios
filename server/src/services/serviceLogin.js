@@ -34,20 +34,25 @@ export const verifyCredentials = async (credentials) => {
       rol: user.USER_TYPE,
     };
   } catch (error) {
-    return { state: "ERROR", message: "Error al iniciar sesión", token: null };
+    return { state: "ERROR", message: "Error al iniciar sesión", token: null,rol:null };
   }
 };
 
-export const verifyToken = async (token) => {
+
+export const authMiddleware = (req, res, next) => {
+  // Obtener el token de los encabezados de la solicitud
+  const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
+  
+  if (!token) {
+    return res.send({state:"ERROR",message:"No token provided"});
+  }
+
   try {
-    dotenv.config();
-    const response = jwt.verify(token, process.env.SECRETWORD);
-    return response;
-  } catch (error) {
-    if (error.name === "TokenExpiredError")
-      return { state: "ERROR", message: "Tiempo de sesion expirado" };
-    if (error.name === "JsonWebTokenError")
-      return { state: "ERROR", message: "Error de autenticacion" };
-    return { state: "ERROR", message: "Violacion de seguridad" };
+    // Verificar el token
+    const decoded = jwt.verify(token,process.env.SECRETWORD); // Usa la clave secreta adecuada
+    //req.user = decoded; // Adjuntar el payload del token al objeto de solicitud
+    next(); // Continuar con la siguiente función de middleware o la ruta
+  } catch (ex) {
+    res.send({state:"ERROR",message:"No token valid"});
   }
 };
