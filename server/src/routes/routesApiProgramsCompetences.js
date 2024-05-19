@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllCompetences, getAllPrograms , getCompetenceById, getCompetenceByProgram, getCompetencesByProgram, getProgramById} from "../apis/apiProgramsCompetence.js"
+import { getAllCompetences, getAllPrograms , getCompetenceById, getCompetenceByProgram, getCompetencesByProgram, getProgramById, getCompetenceByName} from "../apis/apiProgramsCompetence.js"
 
 const routerApiProgramCompetence = Router();
 const pathBase = '/apiProgramCompetences/';
@@ -65,6 +65,16 @@ routerApiProgramCompetence.get(pathBase + 'getCompetenceByProgram', async (req, 
     const {idCompetence,idProgram}=req.body;
     const info = await getCompetenceByProgram(idCompetence,idProgram);
     res.send(info);
+});
+
+/**
+ * Obtiene una competencia específica por su nombre pasado por el request body.
+ * @returns {Promise<Object|null>} Un objeto que representa la competencia encontrada, COMPETENCE_ID=-1 si no se encontró.
+ */
+routerApiProgramCompetence.get(pathBase + 'getCompetenceByName', async (req, res) => {
+    const {name}=req.body;
+    const program = await getCompetenceByName(name);
+    res.send(program);
 });
 
 

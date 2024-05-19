@@ -72,3 +72,9 @@ export const getCompetenceByProgram = async (idCompetence,idProgram) => {
   if(info[0])return info[0];
   return {COMPETENCE_ID:-1, PROGRAM_ID:-1};
 };
+
+export const getCompetenceByName = async (name) => {
+  const [response] = await pool.query("SELECT * FROM competence WHERE COMPETENCE_NAME = ?",[name]);
+  if(response[0])return response[0];
+  return {COMPETENCE_ID:-1};
+};

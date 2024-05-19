@@ -13,9 +13,9 @@ export const createAcademicPeriod = async (create) => {
       );
       return {state: "SUCCESS", message: "Periodo Academico creado con exito :D "};
     }catch(e){
-        if(e.errno== 1048 ) return "NULL";
-        if(e.errno== 1062 ) return "DUPLICATE";
-        return e;
+        if(e.errno== 1048 ) return {state: "NULL", message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."};
+        if(e.errno== 1062 ) return {state: "DUPLICATE", message: "Ya existe un periodo academico con ese identificador (ID)"};
+        return {state: "ERROR", message: "Ha ocurrido un error al crear el periodo academico. Periodo academico NO creado"};
     }
 };
 
@@ -28,9 +28,9 @@ export const updateAcademicPeriod = async (updt)=>{
     return {state: "SUCCESS", message: "Periodo Academico editado con exito :D "};
     }
     catch(e){
-        if(e.errno== 1048 ) return "NULL";
-        if(e.errno== 1062 ) return "DUPLICATE";
-        return e;
+        if(e.errno== 1048 ) return {state: "NULL", message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."};
+        if(e.errno== 1062 ) return {state: "DUPLICATE", message: "Ya existe un periodo academico con ese identificador (ID)"};
+        return {state: "ERROR", message: "Ha ocurrido un error al editar el periodo academico. Periodo academico NO editado"};
     }
 }
 
@@ -49,9 +49,9 @@ export const changeAcademicPeriod = async (chang)=>{
     return {state: "SUCCESS", message: "Se cambio el estado con exito :D "};
     }
     catch(e){
-        if(e.errno== 1048 ) return "NULL";
-        if(e.errno== 1062 ) return "DUPLICATE";
-        return e;
+        if(e.errno== 1048 ) return {state: "NULL", message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."};
+        if(e.errno== 1062 ) return {state: "DUPLICATE", message: "Ya existe un periodo academico con ese identificador (ID)"};
+        return {state: "ERROR", message: "Ha ocurrido un error al actualizar el estado del periodo academico. Estado del periodo academico NO actualizado"};
     }
 };
 

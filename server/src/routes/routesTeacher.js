@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { getAllTeachers, createTeacher, getActiveTeachers, getTeacherById, updateTeacher, changeTeacherStatus } from "../services/serviceTeacher.js"; 
+import { getAllTeachers, createTeacher, getActiveTeachers, getTeacherById, updateTeacher, changeTeacherStatus, getTeacherByName } from "../services/serviceTeacher.js"; 
 
 const routerTeacher = Router();
 const pathBase = '/teacher/';
@@ -38,6 +38,12 @@ routerTeacher.post(pathBase + "changeTeacherStatus", async (req, res) => {
     const {id,status} = req.body;
     const response = await changeTeacherStatus(id,status);
     res.json(response);
+});
+
+routerTeacher.get(pathBase + "getTeacherByName", async (req, res) => {
+    const {name} = req.body;
+    const teacher = await getTeacherByName(name);
+    res.json(teacher);
 });
 
 export default routerTeacher;

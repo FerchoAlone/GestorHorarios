@@ -10,7 +10,8 @@ export const getTeacherById = async (id) => {
     "SELECT * FROM teacher WHERE TEACHER_ID = ?",
     [id]
   );
-  return response[0];
+  if(response[0]) return response[0];
+    return {TEACHER_ID:-1};
 };
 
 export const createTeacher = async (teacher) => {
@@ -44,11 +45,28 @@ export const createTeacher = async (teacher) => {
 
     await connection.commit();
 
-    return response;
+    return {
+      status: "SUCCESS",
+      message: "Profesro creado exitosamente.",
+      data: response
+    };
   } catch (e) {
-    if (e.errno == 1062) return "DUPLICATE";
-    if (e.errno == 1048) return "NULL";
-    return e;
+    if (e.errno == 1062) {
+      return {
+        status: "DUPLICATE",
+        message: "Ya existe un profesor con ese identificador (ID)",
+      };
+    };
+    if (e.errno == 1048){
+      return {
+        status: "NULL",
+        message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."
+      };
+    };
+    return {
+      status: "error",
+      message: e.message
+    };
   } finally {
     if (connection) {
       connection.release();
@@ -73,11 +91,21 @@ export const updateTeacher = async (teacher) => {
         teacher.id,
       ]
     );
-    return response;
+    return { state: "SUCCESS", message: "Profesor actualizado exitosamente" };
   } catch (e) {
-    if (e.errno == 1062) return "DUPLICATE";
-    if (e.errno == 1048) return "NULL";
-    return "ERROR";
+    if (e.errno == 1062){
+      return {
+        state: "DUPLICATE",
+        message: "Ya existe un profesor con ese identificador (ID)",
+      };
+    };
+    if (e.errno == 1048){
+      return {
+        state: "NULL",
+        message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."
+      };
+    };
+    return { state: "ERROR", message: "Ha ocurrido un error al actualizar el profesor. Profesor NO actualizado" };
   }
 };
 
@@ -87,11 +115,21 @@ export const changeTeacherStatus = async (id, status) => {
       "UPDATE teacher SET TEACHER_STATUS = ? WHERE TEACHER_ID = ?",
       [status, id]
     );
-    return response;
+    return { state: "SUCCESS", message: "Estado del profesor actualizado exitosamente" };
   } catch (e) {
-    if (e.errno == 1062) return "DUPLICATE";
-    if (e.errno == 1048) return "NULL";
-    return e.message;
+    if (e.errno == 1062) {
+      return {
+        state: "DUPLICATE",
+        message: "Ya existe un profesor con ese identificador (ID)",
+      };
+    };
+    if (e.errno == 1048) {
+      return {
+        state: "NULL",
+        message: "Informacion incompleta: Por favor, complete todos los campos obligatorios."
+      };
+    };
+    return { state: "ERROR", message: "Ha ocurrido un error al actualizar el estado del profesor. Estado del profesor NO actualizado" };
   }
 };
 
@@ -100,4 +138,13 @@ export const getActiveTeachers = async () => {
     "SELECT * FROM teacher WHERE TEACHER_STATUS = 1"
   );
   return response;
+};
+
+export const getTeacherByName = async (name) => {
+  const [response] = await pool.query(
+    "SELECT * FROM teacher WHERE TEACHER_FIRSTNAME = ?",
+    [name]
+  );
+  if(response[0]) return response[0];
+    return {TEACHER_FIRSTNAME:-1};
 };
