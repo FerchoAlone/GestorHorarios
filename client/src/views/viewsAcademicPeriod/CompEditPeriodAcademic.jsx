@@ -6,7 +6,8 @@ function CompEditPeriodAcademic({ handleClose, id }) {
   const [dateEnd, setDateEnd] = useState("DdateEnd");
   const [isActive, setIsActive] = useState(false);
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = (e) => {
+    e.preventDefault();
     // Aquí puedes manejar la lógica de guardar los cambios
   };
 
@@ -24,7 +25,7 @@ function CompEditPeriodAcademic({ handleClose, id }) {
             ></button>
           </div>
           <div className="modal-body">
-            <form>
+            <form onSubmit={(e)=>handleSaveChanges(e)}>
               <div className="mb-3">
                 <label className="form-label">Identificación:</label>
                 <input
@@ -73,13 +74,11 @@ function CompEditPeriodAcademic({ handleClose, id }) {
                   {isActive ? "ACTIVO" : "INACTIVO"}
                 </button>
               </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleSaveChanges}
+
+              <div className="mb-3">
+              <button
+              type="submit"
+              className="btn btn-primary me-3"
             >
               Guardar Cambios
             </button>
@@ -90,6 +89,8 @@ function CompEditPeriodAcademic({ handleClose, id }) {
             >
               Cancelar
             </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

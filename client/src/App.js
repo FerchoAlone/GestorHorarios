@@ -10,6 +10,8 @@ import CompCreatePeriod from "./views/viewsAcademicPeriod/CompCreatePeriod";
 import CompConsultPeriod from "./views/viewsAcademicPeriod/CompConsultPeriod";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import CompCreateEnvironment from "./views/viewsEnvironment/CompCreateEnvironment";
+import CompQueryEnvironment from "./views/viewsEnvironment/CompQueryEnvironment";
 
 function App() {
 
@@ -20,7 +22,7 @@ function App() {
           <Route path="/login" element={<CompLogin />}></Route>
           <Route path="/management" element={<CompHomeCoordinator/>}></Route>
           <Route path="/managementTeacher" element={<Management name="Docente" compCreate={<CompCreateTeacher/>} compQuery={<CompQueryTeacher/>} />}></Route>
-          <Route path="/managementEnvironment" element={<Management name="Ambiente" compCreate={<h2>CREAR DOCENTE</h2>} compQuery={<h2>CONSULTAR DOCENTE</h2>} />}></Route>
+          <Route path="/managementEnvironment" element={<Management name="Ambiente" compCreate={<CompCreateEnvironment/>} compQuery={<CompQueryEnvironment/>} />}></Route>
           <Route path="/managementAcademicPeriod" element={<Management name="Periodo academico" compCreate={<CompCreatePeriod/>} compQuery={<CompConsultPeriod/>} />}></Route>
           <Route path="/managementSchedule" element={<h2>Schedule</h2>}></Route>
         </Routes>

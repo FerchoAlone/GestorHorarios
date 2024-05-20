@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const URI = process.env.REACT_APP_API_URL || 'http://localhost:3001/createAcademicPeriod';
 
 const CompCreateAcademicPeriod = () => {
     const [name, setName] = useState('');
     const [datestart, setDateStart] = useState('');
     const [duration, setDuration] = useState(3);
     const [dateend, setDateEnd] = useState('');
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (datestart) {
@@ -22,8 +18,8 @@ const CompCreateAcademicPeriod = () => {
 
     const store = async (e) => {
         e.preventDefault();
-        await axios.post(URI, { name, datestart, duration, dateend });
-        navigate('/');
+        //await axios.post(URI, { name, datestart, duration, dateend });
+        //navigate('/');
     }
 
     return (
@@ -39,6 +35,8 @@ const CompCreateAcademicPeriod = () => {
                         className="form-control"
                         id="name"
                         placeholder="Ingrese el nombre"
+                        required
+                        minLength="5"
                     />
                 </div>
                 <div className="mb-3">
@@ -49,6 +47,7 @@ const CompCreateAcademicPeriod = () => {
                         type="date"
                         className="form-control"
                         id="datestart"
+                        required
                     />
                 </div>
                 <div className="mb-3">
@@ -63,6 +62,7 @@ const CompCreateAcademicPeriod = () => {
                                 value={3}
                                 checked={duration === 3}
                                 onChange={() => setDuration(3)}
+                                required
                             />
                             <label className="form-check-label" htmlFor="threeMonths">3 meses</label>
                         </div>

@@ -7,7 +7,9 @@ function CompEditTeacher({ handleClose, id }) {
   const [area, setArea] = useState("defaultArea");
   const [isActive, setIsActive] = useState(false);
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = (e) => {
+    e.preventDefault();
+    console.log("Guardando cambios...");
     // Aquí puedes manejar la lógica de guardar los cambios
   };
 
@@ -26,7 +28,7 @@ function CompEditTeacher({ handleClose, id }) {
           </div>
           <div className="modal-body">
             <div className="container mt-1">
-              <form className="border border-dark rounded p-4">
+              <form className="border border-dark rounded p-4" onSubmit={(e)=>handleSaveChanges(e)}>
                 <div className="row">
                   <div className="col-sm-7">
                     <div className="mb-3 d-flex align-items-center">
@@ -106,24 +108,23 @@ function CompEditTeacher({ handleClose, id }) {
                     </div>
                   </div>
                 </div>
+                <div className="mb-3">
+                  <button
+                    type="submit"
+                    className="btn btn-primary me-3"
+                  >
+                    Guardar Cambios
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={handleClose}
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </form>
             </div>
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-primary me-3"
-              onClick={handleSaveChanges}
-            >
-              Guardar Cambios
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={handleClose}
-            >
-              Cancelar
-            </button>
           </div>
         </div>
       </div>
