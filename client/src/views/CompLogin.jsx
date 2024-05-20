@@ -11,13 +11,18 @@ function CompLogin() {
     //TODO: HACER VALIDACIONES DE CAMPOS
     e.preventDefault();
     const res= await login(user, password);
-    if(res){
-      navigator('/inicio')
-    }else{
-      navigator('/')
+    if(res.status){
+      if(res.rol==="COORDINADOR"){
+        console.log("Permiso de coordinador");
+        navigator('/management')
+      }else{
+        console.log("Permiso de docente");
+        navigator('/docente')
+      }
+      
     }
   }
-
+  console.log("Render CompLogin")
   return (
     <div className="container d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
       <div>
