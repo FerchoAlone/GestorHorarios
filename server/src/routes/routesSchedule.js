@@ -11,18 +11,19 @@ const routerSchedule = Router();
 const pathBase = "/schedule/";
 
 routerSchedule.get(
-  pathBase + "getScheduleByTeacherAndPeriod",
+  pathBase + "getScheduleByTeacherAndPeriod/:PERIOD_ID/:TEACHER_ID",
   async (req, res) => {
-    const { PERIOD_ID, TEACHER_ID } = req.body;
+    const { PERIOD_ID, TEACHER_ID } = req.params;
     const schedule = await getScheduleByTeacherAndPeriod(PERIOD_ID, TEACHER_ID);
     res.send(schedule);
   }
 );
 
 routerSchedule.get(
-  pathBase + "getScheduleByPeriodProgramEnvironment",
+  pathBase + "getScheduleByPeriodProgramEnvironment/:PERIOD_ID/:PROGRAM_ID/:ENVIRONMENT_ID",
   async (req, res) => {
-    const { PERIOD_ID, PROGRAM_ID, ENVIRONMENT_ID } = req.body;
+    const { PERIOD_ID, PROGRAM_ID, ENVIRONMENT_ID } = req.params;
+    console.log(PERIOD_ID, PROGRAM_ID, ENVIRONMENT_ID);
     const schedule = await getScheduleByPeriodProgramEnvironment(
       PERIOD_ID,
       PROGRAM_ID,
