@@ -1,11 +1,20 @@
 import React, { useState } from "react";
+import axios from "axios";
 
-function CompEditEnvironment({ handleClose, id }) {
-  const [name, setName] = useState("a");
-  const [location, setLocation] = useState("a");
-  const [type, setType] = useState(null); // null: none selected, "Presencial", "Virtual"
-  const [capacity, setCapacity] = useState(15);
-  const [isActive, setIsActive] = useState(false);
+function CompEditEnvironment({ handleClose, environment }) {
+  const [name, setName] = useState(environment.ENVIRONMENT_NAME);
+  const [location, setLocation] = useState(environment.ENVIRONMENT_LOCATION);
+  const [type, setType] = useState(environment.ENVIRONMENT_TYPE); 
+  const [capacity, setCapacity] = useState(environment.ENVIRONMENT_CAPACITY);
+  const [isActive, setIsActive] = useState(environment.ENVIRONMENT_STATUS);
+
+  const changeActive = (isActive) => {
+    if(isActive==="1"){
+      setIsActive("0");
+    }else{
+      setIsActive("1");
+    }
+  }
 
   const handleTypeChange = (typeSelected) => {
     if (type === typeSelected) {
@@ -15,9 +24,16 @@ function CompEditEnvironment({ handleClose, id }) {
     }
   };
 
-  const handleSaveChanges = (e) => {
+  const handleSaveChanges =async (e) => {
     e.preventDefault();
-    // Aquí puedes manejar la lógica de guardar los cambios
+    const response =await axios.post("http://localhost:3001/environment/updateEnvironment", {id:environment.ENVIRONMENT_ID, name, location, type, capacity, status:isActive});
+    if(response.data.state==="SUCCESS"){
+      alert(response.data.message);
+      handleClose();
+    }else{
+      alert(response.data.message);
+    }
+    
   };
 
   return (
@@ -40,7 +56,7 @@ function CompEditEnvironment({ handleClose, id }) {
                 <input
                   type="text"
                   className="form-control"
-                  value={id}
+                  value={environment.ENVIRONMENT_ID}
                   readOnly
                 />
               </div>
@@ -53,6 +69,7 @@ function CompEditEnvironment({ handleClose, id }) {
                   onChange={(e) => setName(e.target.value)}
                   required
                   minLength="3"
+                  maxLength="50"
                 />
               </div>
               <div className="mb-3">
@@ -64,6 +81,7 @@ function CompEditEnvironment({ handleClose, id }) {
                   onChange={(e) => setLocation(e.target.value)}
                   required
                   minLength="2"
+                  maxLength="50"
                 />
               </div>
               <div className="mb-3">
@@ -73,8 +91,8 @@ function CompEditEnvironment({ handleClose, id }) {
                     <input
                       type="radio"
                       className="form-check-input"
-                      checked={type === "Presencial"}
-                      onChange={() => handleTypeChange("Presencial")}
+                      checked={type === "PRESENCIAL"}
+                      onChange={() => handleTypeChange("PRESENCIAL")}
                     />
                     Presencial
                   </label>
@@ -82,8 +100,8 @@ function CompEditEnvironment({ handleClose, id }) {
                     <input
                       type="radio"
                       className="form-check-input "
-                      checked={type === "Virtual"}
-                      onChange={() => handleTypeChange("Virtual")}
+                      checked={type === "VIRTUAL"}
+                      onChange={() => handleTypeChange("VIRTUAL")}
                     />
                     Virtual
                   </label>
@@ -97,15 +115,16 @@ function CompEditEnvironment({ handleClose, id }) {
                   value={capacity}
                   onChange={(e) => setCapacity(e.target.value)}
                   required
+                  max="100"
                 />
               </div>
               <div className="mb-3">
                 <button
                   type="button"
-                  className={`btn ${isActive ? "btn-success" : "btn-danger"}`}
-                  onClick={() => setIsActive(!isActive)}
+                  className={`btn ${isActive==="1" ? "btn-success" : "btn-danger"}`}
+                  onClick={() => changeActive(isActive)}
                 >
-                  {isActive ? "ACTIVO" : "INACTIVO"}
+                  {isActive==="1" ? "ACTIVO" : "INACTIVO"}
                 </button>
               </div>
               <div className="mb-3">

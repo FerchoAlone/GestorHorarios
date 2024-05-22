@@ -1,21 +1,13 @@
 import React from "react";
 
-function CompInfoEnviorement({ handleClose, id }) {
-  // Información simulada de un período académico
-  const periodoInfo = {
-    id: "AA001",
-    nombre: "Salon 415",
-    ubicacion: "FIET",
-    tipoAmbiente: "Virtual",
-    capacidad: "25 estudiantes",
-  };
+function CompInfoEnviorement({ handleClose, environment }) {
 
   return (
     <div className="modal d-block" tabIndex="-1" role="dialog">
       <div className="modal-dialog modal-dialog-centered " role="document">
         <div className="modal-content">
           <div className="modal-header ">
-            <h5 className="modal-title">Información Ambiente {id}</h5>
+            <h5 className="modal-title">Información Ambiente</h5>
             <button
               type="button"
               className="btn-close"
@@ -26,19 +18,19 @@ function CompInfoEnviorement({ handleClose, id }) {
           <div className="modal-body">
             <div className="container">
               <div className="mb-2 text-center">
-                <strong>Codigo: </strong> {periodoInfo.id}
+                <strong>Codigo: </strong> {environment.ENVIRONMENT_ID}
               </div>
               <div className="mb-2 text-center">
-                <strong>Nombre:</strong> {periodoInfo.nombre}
+                <strong>Nombre:</strong> {environment.ENVIRONMENT_NAME}
               </div>
               <div className="mb-2 text-center">
-                <strong>Ubicacion: </strong> {periodoInfo.ubicacion}
+                <strong>Ubicacion: </strong> {environment.ENVIRONMENT_LOCATION}
               </div>
               <div className="mb-2 text-center">
-                <strong>Tipo ambiente: </strong> {periodoInfo.tipoAmbiente}
+                <strong>Tipo ambiente: </strong> {environment.ENVIRONMENT_TYPE}
               </div>
               <div className="mb-2 text-center">
-                <strong>Capacidad: </strong> {periodoInfo.capacidad}
+                <strong>Capacidad: </strong> {environment.ENVIRONMENT_CAPACITY}
               </div>
             </div>
           </div>

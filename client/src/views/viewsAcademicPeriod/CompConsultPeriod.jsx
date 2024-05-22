@@ -1,41 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
 import CompInfoAcademicPeriod from "./CompInfoAcademicPeriod";
 import CompEditPeriodAcademic from "./CompEditPeriodAcademic";
 
 const CompConsultPeriod = () => {
-  const [idSelected, setIdSelected] = useState(null);
+  const [periodAcademic, setPeriodAcademic] = useState({});
   const [showModalInfo, setShowModalInfo] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
-  const handleShowModalInfo = (id) => {
-    setShowModalInfo(true);
-    setIdSelected(id);
-  };
-  const handleCloseModalInfo = () => {
-    setShowModalInfo(false);
-    setIdSelected(null);
-  };
-  const handleShowModalEdit = (id) => {
-    setShowModalEdit(true);
-    setIdSelected(id);
-  };
-  const handleCloseModalEdit = () => {
-    setShowModalEdit(false);
-    setIdSelected(null);
-  };
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [periods, setPeriods] = useState([
-    { id: "00001", name: "2024-1", date:"date",active: true },
-    { id: "00002", name: "2023-2", date:"date",active: true },
-    { id: "00003", name: "2024-2", date:"date",active: true },
-    // Add more period objects here
-  ]);
+  const [periods, setPeriods] = useState([]);
+  const handleShowModalInfo = (period) => {
+    setShowModalInfo(true);
+    setPeriodAcademic(period);
+  };
 
-  const itemsPerPage = 3;
+  const handleCloseModalInfo = () => {
+    setShowModalInfo(false);
+    setPeriodAcademic(null);
+  };
+
+  const handleShowModalEdit = (period) => {
+    setShowModalEdit(true);
+    setPeriodAcademic(period);
+  };
+
+  const handleCloseModalEdit = () => {
+    setShowModalEdit(false);
+    setPeriodAcademic(null);
+    fetchPeriods();
+  };
+
+  // Función para obtener todos los periodos académicos desde el backend
+  const fetchPeriods = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/academicPeriod/getAll");
+      setPeriods(response.data); // Actualizar el estado con los periodos académicos obtenidos
+    } catch (error) {
+      console.error("Error fetching periods:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPeriods(); // Llamar a fetchPeriods al montar el componente
+  }, []); // El segundo argumento es un array vacío para que se ejecute solo una vez al montar el componente
+
+  // Resto del código del componente aquí...
+
+  const itemsPerPage = 7;
   const filteredPeriods = periods.filter(
     (period) =>
-      period.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      period.id.toLowerCase().includes(searchTerm.toLowerCase())
+      period.PERIOD_NAME.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const paginatedPeriods = filteredPeriods.slice(
@@ -45,13 +61,26 @@ const CompConsultPeriod = () => {
 
   const totalPages = Math.ceil(filteredPeriods.length / itemsPerPage);
 
-  const toggleActiveStatus = (id) => {
-    setPeriods((prevPeriods) =>
-      prevPeriods.map((period) =>
-        period.id === id ? { ...period, active: !period.active } : period
-      )
-    );
+  const toggleActiveStatus = async (id, status) => {
+
+    if (status === "1") {
+      await changeStateAcademicPeriod(id, "0");
+    } else {
+      await changeStateAcademicPeriod(id, "1");
+    }
+
   };
+
+  const changeStateAcademicPeriod = async (id, status) => {
+    const url = "http://localhost:3001/academicPeriod/changeAcademicPeriod";
+    const response = await axios.post(url, { id, status });
+    if (response.data.state === "SUCCESS") {
+      fetchPeriods();
+    } else {
+      alert(response.data.message);
+    }
+
+  }
 
   return (
     <div className="container mt-3">
@@ -74,40 +103,40 @@ const CompConsultPeriod = () => {
             <tr>
               <th>Id</th>
               <th>Nombre</th>
-              <th>Tipo</th>
+              <th>Fecha de Inicio</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {paginatedPeriods.map((period) => (
-              <tr key={period.id}>
-                <td>{period.id}</td>
-                <td>{period.name}</td>
-                <td>{period.date}</td>
+              <tr key={period.PERIOD_ID}>
+                <td>{period.PERIOD_ID}</td>
+                <td>{period.PERIOD_NAME}</td>
+                <td>{period.PERIOD_START_DATE.split('T')[0]}</td>
                 <td className="d-flex justify-content-between align-items-center">
                   <button
                     className="btn btn-link p-0"
-                    onClick={() => handleShowModalInfo(period.id)}
+                    onClick={() => handleShowModalInfo(period)}
                   >
                     <i className="bi bi-eye"></i>
                   </button>
                   <button
                     className="btn btn-link p-0"
-                    onClick={() => handleShowModalEdit(period.id)}
+                    onClick={() => handleShowModalEdit(period)}
                   >
                     <i className="bi bi-pencil"></i>
                   </button>
                   <button
                     className="btn btn-link p-0"
-                    onClick={() => toggleActiveStatus(period.id)}
+                    onClick={() => toggleActiveStatus(period.PERIOD_ID, period.PERIOD_STATUS)}
                   >
-                    {period.active ? (
+                    {period.PERIOD_STATUS === "1" ? (
                       <i className="bi bi-toggle-on"></i>
                     ) : (
                       <i className="bi bi-toggle-off"></i>
                     )}
                   </button>
-                  <span>{period.active ? "Activo" : "Inactivo"}</span>
+                  <span>{period.PERIOD_STATUS === "1" ? "Activo" : "Inactivo"}</span>
                 </td>
               </tr>
             ))}
@@ -121,9 +150,8 @@ const CompConsultPeriod = () => {
             {Array.from({ length: totalPages }, (_, index) => (
               <li
                 key={index + 1}
-                className={`page-item ${
-                  index + 1 === currentPage ? "active" : ""
-                }`}
+                className={`page-item ${index + 1 === currentPage ? "active" : ""
+                  }`}
               >
                 <button
                   className="page-link"
@@ -136,8 +164,8 @@ const CompConsultPeriod = () => {
           </ul>
         </nav>
       </div>
-      {showModalInfo && <CompInfoAcademicPeriod handleClose={handleCloseModalInfo} id={idSelected} />}
-      {showModalEdit && <CompEditPeriodAcademic handleClose={handleCloseModalEdit} id={idSelected} />}
+      {showModalInfo && <CompInfoAcademicPeriod handleClose={handleCloseModalInfo} periodoInfo={periodAcademic} />}
+      {showModalEdit && <CompEditPeriodAcademic handleClose={handleCloseModalEdit} periodEdit={periodAcademic} />}
     </div>
   );
 };

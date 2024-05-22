@@ -1,74 +1,78 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CompEditEnvironment from "./CompEditEnvironment";
 import CompInfoEnviorement from "./CompInfoEnviorement";
-//import CompInformationTeacher from "./CompInformationTeacher";
-//import CompEditTeacher from "./CompEditTeacher";
+import axios from "axios";
 
 function CompQueryEnvironment() {
-  const [idSelected, setIdSelected] = useState(null);
+  const [environmentSelected, setEnvironmentSelected] = useState({});
   const [showModalInfo, setShowModalInfo] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
-  const handleShowModalInfo = (id) => {
+  const handleShowModalInfo = (environment) => {
     setShowModalInfo(true);
-    setIdSelected(id);
+    setEnvironmentSelected(environment);
   };
   const handleCloseModalInfo = () => {
     setShowModalInfo(false);
-    setIdSelected(null);
+    setEnvironmentSelected(null);
   };
-  const handleShowModalEdit = (id) => {
+  const handleShowModalEdit = (environment) => {
     setShowModalEdit(true);
-    setIdSelected(id);
+    setEnvironmentSelected(environment);
   };
   const handleCloseModalEdit = () => {
     setShowModalEdit(false);
-    setIdSelected(null);
+    setEnvironmentSelected(null);
+    getEnvironmentsDB();
   };
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [environments, setEnvironments] = useState([
-    {
-      id: "AAA001",
-      name: "Salon 105",
-      location: "FIET",
-      active: true,
-    },
-    {
-      id: "AAA002",
-      name: "Salon 230",
-      location: "FIET",
-      active: true,
-    },
-    {
-      id: "AAA003",
-      name: "Salon 231",
-      location: "FIET",
-      active: false,
-    },
-  ]);
+  const [environments, setEnvironments] = useState([]);
 
-  const itemsPerPage = 3;
-  const filteredTeachers = environments.filter(
-    (teacher) =>
-      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.id.toLowerCase().includes(searchTerm.toLowerCase())
+  const itemsPerPage = 7;
+  const filteredEnvironments = environments.filter(
+    (environment) =>
+      environment.ENVIRONMENT_NAME.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      environment.ENVIRONMENT_ID.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const paginatedTeachers = filteredTeachers.slice(
+  const paginatedTeachers = filteredEnvironments.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const totalPages = Math.ceil(filteredTeachers.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredEnvironments.length / itemsPerPage);
 
-  const toggleActiveStatus = (id) => {
-    setEnvironments((prevTeachers) =>
-      prevTeachers.map((teacher) =>
-        teacher.id === id ? { ...teacher, active: !teacher.active } : teacher
-      )
-    );
+  const toggleActiveStatus =async (id,status) => {
+
+    if(status==="1"){
+      await changeStateEnvironment(id,"0");
+    }else{
+      await changeStateEnvironment(id,"1");
+    }
+    
   };
+
+  const getEnvironmentsDB = async () => {
+    const url="http://localhost:3001/environment/getAll";
+    const response = await axios.get(url);
+    setEnvironments(response.data);
+  };
+
+  const changeStateEnvironment = async (id, status) => {
+    const url="http://localhost:3001/environment/changeStateEnvironment";
+    const response = await axios.post(url, { id, status });
+    if (response.data.state === "SUCCESS") {
+      getEnvironmentsDB();
+    } else {
+      alert(response.data.message);
+    }
+  
+  }
+
+  useEffect(() => {
+    getEnvironmentsDB();
+  }, []); 
 
   return (
     <div className="container mt-3">
@@ -97,34 +101,34 @@ function CompQueryEnvironment() {
           </thead>
           <tbody>
             {paginatedTeachers.map((environment) => (
-              <tr key={environment.id}>
-                <td>{environment.id}</td>
-                <td>{environment.name}</td>
-                <td>{environment.location}</td>
+              <tr key={environment.ENVIRONMENT_ID}>
+                <td>{environment.ENVIRONMENT_ID}</td>
+                <td>{environment.ENVIRONMENT_NAME}</td>
+                <td>{environment.ENVIRONMENT_LOCATION}</td>
                 <td className="d-flex justify-content-between align-items-center">
                   <button
                     className="btn btn-link p-0"
-                    onClick={() => handleShowModalInfo(environment.id)}
+                    onClick={() => handleShowModalInfo(environment)}
                   >
                     <i className="bi bi-eye"></i>
                   </button>
                   <button
                     className="btn btn-link p-0"
-                    onClick={() => handleShowModalEdit(environment.id)}
+                    onClick={() => handleShowModalEdit(environment)}
                   >
                     <i className="bi bi-pencil"></i>
                   </button>
                   <button
                     className="btn btn-link p-0"
-                    onClick={() => toggleActiveStatus(environment.id)}
+                    onClick={() => toggleActiveStatus(environment.ENVIRONMENT_ID, environment.ENVIRONMENT_STATUS)}
                   >
-                    {environment.active ? (
+                    {environment.ENVIRONMENT_STATUS==="1" ? (
                       <i className="bi bi-toggle-on"></i>
                     ) : (
                       <i className="bi bi-toggle-off"></i>
                     )}
                   </button>
-                  <span>{environment.active ? "Activo" : "Inactivo"}</span>
+                  <span>{environment.ENVIRONMENT_STATUS==="1" ? "Activo" : "Inactivo"}</span>
                 </td>
               </tr>
             ))}
@@ -153,8 +157,8 @@ function CompQueryEnvironment() {
           </ul>
         </nav>
       </div>
-      {showModalInfo && <CompInfoEnviorement handleClose={handleCloseModalInfo} id={idSelected} />}
-      {showModalEdit && <CompEditEnvironment handleClose={handleCloseModalEdit} id={idSelected} />}
+      {showModalInfo && <CompInfoEnviorement handleClose={handleCloseModalInfo} environment={environmentSelected} />}
+      {showModalEdit && <CompEditEnvironment handleClose={handleCloseModalEdit} environment={environmentSelected} />}
     </div>
   );
 }

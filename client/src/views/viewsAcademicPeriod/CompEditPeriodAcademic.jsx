@@ -1,15 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-function CompEditPeriodAcademic({ handleClose, id }) {
-  const [name, setName] = useState("Dname");
-  const [dateStart, setDateStart] = useState("DdateStart");
-  const [dateEnd, setDateEnd] = useState("DdateEnd");
-  const [isActive, setIsActive] = useState(false);
+function CompEditPeriodAcademic({ handleClose, periodEdit }) {
+  const [name, setName] = useState(periodEdit.PERIOD_NAME);
+  const [datestart, setDateStart] = useState(periodEdit.PERIOD_START_DATE.split('T')[0]);
+  const [duration, setDuration] = useState(parseInt(periodEdit.PERIOD_DURATION));
+  const [isActive, setIsActive] = useState(periodEdit.PERIOD_STATUS);
+  const [dateend, setDateEnd] = useState('');
 
-  const handleSaveChanges = (e) => {
+  const changeActive = (active) => {
+    if (active === "1") {
+      setIsActive("0");
+    } else {
+      setIsActive("1");
+    }
+  }
+  const handleSaveChanges = async (e) => {
     e.preventDefault();
-    // Aquí puedes manejar la lógica de guardar los cambios
+    const response = await axios.post("http://localhost:3001/academicPeriod/updateAcademicPeriod", { id: periodEdit.PERIOD_ID, datestart, duration, name, status: isActive });
+    if (response.data.state === "SUCCESS") {
+      alert(response.data.message);
+      handleClose();
+
+    } else {
+      alert(response.data.message);
+    }
   };
+
+
+
+  useEffect(() => {
+    if (datestart) {
+      const startDate = new Date(datestart);
+      const endDate = new Date(startDate.setMonth(startDate.getMonth() + duration));
+      setDateEnd(endDate.toISOString().split('T')[0]);
+    }
+  }, [datestart, duration]);
 
   return (
     <div className="modal d-block" tabIndex="-1" role="dialog">
@@ -25,13 +51,13 @@ function CompEditPeriodAcademic({ handleClose, id }) {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={(e)=>handleSaveChanges(e)}>
+            <form onSubmit={(e) => handleSaveChanges(e)}>
               <div className="mb-3">
                 <label className="form-label">Identificación:</label>
                 <input
                   type="text"
                   className="form-control"
-                  value={id}
+                  value={periodEdit.PERIOD_ID}
                   readOnly
                 />
               </div>
@@ -43,6 +69,8 @@ function CompEditPeriodAcademic({ handleClose, id }) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  minLength="5"
+                  maxLength="15"
                 />
               </div>
               <div className="mb-3">
@@ -50,45 +78,76 @@ function CompEditPeriodAcademic({ handleClose, id }) {
                 <input
                   type="date"
                   className="form-control"
-                  value={dateStart}
+                  value={datestart}
                   onChange={(e) => setDateStart(e.target.value)}
                   required
                 />
               </div>
               <div className="mb-3">
-                <label className="form-label">Fecha Final:</label>
+                <label className="form-label">Duración</label>
+                <div>
+                  <div className="form-check form-check-inline">
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="duration"
+                      id="threeMonths"
+                      value={3}
+                      checked={duration === 3}
+                      onChange={() => setDuration(3)}
+                      required
+                    />
+                    <label className="form-check-label" htmlFor="threeMonths">3 meses</label>
+                  </div>
+                  <div className="form-check form-check-inline">
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="duration"
+                      id="sixMonths"
+                      value={6}
+                      checked={duration === 6}
+                      onChange={() => setDuration(6)}
+                    />
+                    <label className="form-check-label" htmlFor="sixMonths">6 meses</label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label" htmlFor="dateend">Fecha Fin</label>
                 <input
+                  value={dateend}
                   type="date"
                   className="form-control"
-                  value={dateEnd}
-                  onChange={(e) => setDateEnd(e.target.value)}
+                  id="dateend"
                   readOnly
                 />
               </div>
               <div className="mb-3">
                 <button
                   type="button"
-                  className={`btn ${isActive ? "btn-success" : "btn-danger"}`}
-                  onClick={() => setIsActive(!isActive)}
+                  className={`btn ${isActive === "1" ? "btn-success" : "btn-danger"}`}
+                  onClick={() => changeActive(isActive)}
                 >
-                  {isActive ? "ACTIVO" : "INACTIVO"}
+                  {isActive === "1" ? "ACTIVO" : "INACTIVO"}
                 </button>
               </div>
 
               <div className="mb-3">
-              <button
-              type="submit"
-              className="btn btn-primary me-3"
-            >
-              Guardar Cambios
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={handleClose}
-            >
-              Cancelar
-            </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary me-3"
+                >
+                  Guardar Cambios
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleClose}
+                >
+                  Cancelar
+                </button>
               </div>
             </form>
           </div>

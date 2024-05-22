@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 function Management({name, compCreate, compQuery}) {
     const [isShowCreate, setisShowCreate]= useState(false);
-    const[isShowQuery, setisShowQuery]=useState(false);
+    const[isShowQuery, setisShowQuery]=useState(true);
     const showCreate = () => {
         setisShowCreate(true);
         setisShowQuery(false);
@@ -29,7 +29,7 @@ function Management({name, compCreate, compQuery}) {
                                         <a className="dropdown-item" href="/managementAcademicPeriod">Gestionar Periodo Academico</a>
                                         <a className="dropdown-item" href="/managementTeacher">Gestionar Docente</a>
                                         <a className="dropdown-item" href="/managementEnvironment">Gestionar Ambiente</a>
-                                        <a className="dropdown-item" href="/Schudule/management">Gestionar Horarios</a>
+                                        <a className="dropdown-item" href="/managementSchedule">Gestionar Horarios</a>
                                     </div>
                                 </div>
 

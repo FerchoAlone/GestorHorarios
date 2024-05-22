@@ -1,18 +1,24 @@
 import React, { useState } from "react";
-
+import axios from "axios";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 const CompCreateEnvironment = () => {
-    const [code, setCode] = useState('');
+    const [id, setId] = useState('');
     const [name, setName] = useState('');
-    const [ubication, setUbication] = useState('');
-    const [environmentType, setEnvironmentType] = useState('presencial'); // Corregido el nombre de la variable
+    const [location, setLocation] = useState('');
+    const [type, setType] = useState('PRESENCIAL'); // Corregido el nombre de la variable
     const [capacity, setCapacity] = useState('');
 
     const store = async (e) => {
         e.preventDefault();
-        // Evitar que el formulario recargue la página
+        const response = await axios.post("http://localhost:3001/environment/createEnvironment", {id, name, location,capacity,type,status:1 });
+        if(response.data.state==="SUCCES"){
+            alert(response.data.message);
+        }else{
+            alert(response.data.message);
+        }
+            
     };
 
     return (
@@ -22,14 +28,15 @@ const CompCreateEnvironment = () => {
                     <div className="mb-3">
                         <label className="form-label" htmlFor="code">Código</label>
                         <input
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
+                            value={id}
+                            onChange={(e) => setId(e.target.value)}
                             type="text"
                             className="form-control"
                             id="code"
                             placeholder="Ingrese el código"
                             required
                             minLength="6"
+                            maxLength="6"
                         />
                     </div>
                     <div className="mb-3">
@@ -42,20 +49,22 @@ const CompCreateEnvironment = () => {
                             id="name"
                             placeholder="Ingrese el nombre"
                             required
-                            minLength="6"
+                            minLength="3"
+                            maxLength="50"
                         />
                     </div>
                     <div className="mb-3">
                         <label className="form-label" htmlFor="ubication">Ubicación</label>
                         <input
-                            value={ubication}
-                            onChange={(e) => setUbication(e.target.value)}
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
                             type="text"
                             className="form-control"
                             id="ubication"
                             placeholder="Ingrese la ubicación"
                             required
                             minLength="2"
+                            maxLength="50"
                         />
                     </div>
                     <div className="mb-3">
@@ -68,8 +77,8 @@ const CompCreateEnvironment = () => {
                                     name="environmentType"
                                     id="presencial"
                                     value="presencial"
-                                    checked={environmentType === "presencial"}
-                                    onChange={() => setEnvironmentType("presencial")}
+                                    checked={type === "PRESENCIAL"}
+                                    onChange={() => setType("PRESENCIAL")}
                                 />
                                 <label className="form-check-label" htmlFor="presencial">Presencial</label>
                             </div>
@@ -80,8 +89,8 @@ const CompCreateEnvironment = () => {
                                     name="environmentType"
                                     id="virtual"
                                     value="virtual"
-                                    checked={environmentType === "virtual"}
-                                    onChange={() => setEnvironmentType("virtual")}
+                                    checked={type === "VIRTUAL"}
+                                    onChange={() => setType("VIRTUAL")}
                                 />
                                 <label className="form-check-label" htmlFor="virtual">Virtual</label>
                             </div>
@@ -98,6 +107,8 @@ const CompCreateEnvironment = () => {
                             id="capacity"
                             placeholder="Ingrese la capacidad"
                             required
+                            max="100"
+                            min="1"
                         />
                     </div>
                     <button type="submit" className="btn btn-primary w-100">Crear</button>
