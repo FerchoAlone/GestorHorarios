@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { AuthContext } from "../AuthProvider";
-
+import CompoInformationTimeSlot from "./CompInformationTimeSlot";
 
 const CompViewTeacher = () => {
   const [schedule, setSchedule] = useState({
@@ -28,6 +28,18 @@ const CompViewTeacher = () => {
   const [academicPeriod, setAcademicPeriod] = useState([]);
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
+  const [timeSlot,setTimeSlot]=useState({});
+  const [showModalInfo, setShowModalInfo] = useState(false);
+
+  const handleTimeSlotChange=(timeslot)=>{
+    setShowModalInfo(true)
+    setTimeSlot(timeslot);
+  }
+
+  const handleCloseModalInfo = () => {
+    setShowModalInfo(false);
+    setTimeSlot(null);
+  };
 
   const [teacher, setTeacher] = useState({});
   useEffect(() => {
@@ -157,7 +169,7 @@ const CompViewTeacher = () => {
                                 (e.currentTarget.style.backgroundColor = "")
                               }
                               key={activity.SCHEDULE_DAY + '-' + activity.SCHEDULE_START_TIME}
-                              
+                              onClick={()=>handleTimeSlotChange(activity)}
                             >
                               {activity.COMPETENCE_NAME} {activity.ENVIRONMENT_NAME}
                             </td>
@@ -172,6 +184,7 @@ const CompViewTeacher = () => {
           </div>
         </div>
       </div>
+      {showModalInfo && <CompoInformationTimeSlot handleClose={handleCloseModalInfo} timeslot={timeSlot} />}
     </div>
 
 
