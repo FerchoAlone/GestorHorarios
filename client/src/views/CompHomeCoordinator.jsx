@@ -4,6 +4,11 @@ import axios from "axios";
 import { AuthContext } from "./AuthProvider";
 
 function CompHomeCoordinator() {
+    const navigator = useNavigate()
+    const pageRol="COORDINADOR";
+    if(localStorage.getItem("rol")!==pageRol){
+        navigator("/login");
+    }
     const [coordinator, setCoordinator] = useState({});
     useEffect(() => {
         const GetCoordinator = async () => {
@@ -14,9 +19,6 @@ function CompHomeCoordinator() {
         };
         GetCoordinator();
     }, []);
-
-
-    const navigator = useNavigate()
 
     const goAcademicPeriod = () => {
         navigator('/managementAcademicPeriod');

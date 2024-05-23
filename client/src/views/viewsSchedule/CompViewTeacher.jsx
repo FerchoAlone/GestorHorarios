@@ -4,8 +4,12 @@ import axios from "axios";
 import Select from "react-select";
 import { AuthContext } from "../AuthProvider";
 import CompoInformationTimeSlot from "./CompInformationTimeSlot";
+import { useNavigate } from 'react-router-dom';
+
 
 const CompViewTeacher = () => {
+
+  const navigator = useNavigate();
   const [schedule, setSchedule] = useState({
     "08:00 ": [],
     "09:00 ": [],
@@ -28,10 +32,10 @@ const CompViewTeacher = () => {
   const [academicPeriod, setAcademicPeriod] = useState([]);
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
-  const [timeSlot,setTimeSlot]=useState({});
+  const [timeSlot, setTimeSlot] = useState({});
   const [showModalInfo, setShowModalInfo] = useState(false);
 
-  const handleTimeSlotChange=(timeslot)=>{
+  const handleTimeSlotChange = (timeslot) => {
     setShowModalInfo(true)
     setTimeSlot(timeslot);
   }
@@ -70,9 +74,12 @@ const CompViewTeacher = () => {
   };
   useEffect(() => {
     getAcademicPeriods();
-  }, []);
+    const pageRol = "DOCENTE";
+    if (localStorage.getItem("rol") !== pageRol) {
+      navigator("/login");
+    }
 
-
+  }, [navigator]);
 
 
   const handleQuerySchedule = async () => {
@@ -169,7 +176,7 @@ const CompViewTeacher = () => {
                                 (e.currentTarget.style.backgroundColor = "")
                               }
                               key={activity.SCHEDULE_DAY + '-' + activity.SCHEDULE_START_TIME}
-                              onClick={()=>handleTimeSlotChange(activity)}
+                              onClick={() => handleTimeSlotChange(activity)}
                             >
                               {activity.COMPETENCE_NAME} {activity.ENVIRONMENT_NAME}
                             </td>

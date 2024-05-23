@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function Management({name, compCreate, compQuery}) {
-    const [isShowCreate, setisShowCreate]= useState(false);
-    const[isShowQuery, setisShowQuery]=useState(true);
+function Management({ name, compCreate, compQuery }) {
+    const navigator = useNavigate();
+
+    const [isShowCreate, setisShowCreate] = useState(false);
+    const [isShowQuery, setisShowQuery] = useState(true);
     const showCreate = () => {
         setisShowCreate(true);
         setisShowQuery(false);
     }
-    const showQuery=()=>{
+    const showQuery = () => {
         setisShowCreate(false);
         setisShowQuery(true);
     }
+
+    const pageRol = "COORDINADOR";
+    useEffect(() => {
+        if (localStorage.getItem("rol") !== pageRol) {
+            navigator("/login");
+        }
+    }, [navigator]);
+
     return (
         <div className="container-fluid">
             <div className="row">
@@ -49,14 +60,14 @@ function Management({name, compCreate, compQuery}) {
                     <div className="nav-link p-4 fs-5" onClick={showCreate} style={{ cursor: "pointer" }} >
                         <i className="fas fa-plus" ></i> Crear {name}
                     </div>
-                    <div className="nav-link p-4 fs-5" onClick={showQuery}  style={{ cursor: "pointer" }}>
+                    <div className="nav-link p-4 fs-5" onClick={showQuery} style={{ cursor: "pointer" }}>
                         <i className="fas fa-search"></i> Consultar {name}
                     </div>
                 </div>
                 <div className='col-md-1'></div>
                 <div className='col-md-7'>
-                    {isShowCreate? compCreate: <></>}
-                    {isShowQuery? compQuery: <></>}
+                    {isShowCreate ? compCreate : <></>}
+                    {isShowQuery ? compQuery : <></>}
                 </div>
                 <div className='col-md-1'></div>
             </div>
