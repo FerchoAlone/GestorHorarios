@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { TimeSlot } from "./TimeSlot";
 import axios from "axios";
 import Select from "react-select";
 import CompEditTimeSlot from "./CompEditTimeSlot";
@@ -23,24 +22,8 @@ function CompScheduleCoor() {
     "20:00 ": [],
     "21:00 ": [],
   });
-  const [scheduleHours, setScheduleHours] = useState([
-    "07:00",
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
-    "21:00",
-  ]);
-  const [academicPeriods, setAcademicPeriods] = useState([]);
+  const scheduleHours=["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"];
+  const [academicPeriods, setAcademicPeriods] = useState([  ]);
   const [academicPeriod, setAcademicPeriod] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [program, setProgram] = useState([]);
@@ -98,7 +81,6 @@ function CompScheduleCoor() {
       `http://localhost:3001/schedule/getScheduleByPeriodProgramEnvironment/${PERIOD_ID}/${PROGRAM_ID}/${ENVIRONMENT_ID}`
     );
     setSchedule(response.data);
-    console.log(response);
   };
 
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -109,7 +91,6 @@ function CompScheduleCoor() {
     getEnviroments();
   }, []);
 
-
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [timeSlotSelected, setTimeSlotSelected] = useState({});
   const handleShowModalEdit = (timeSlot) => {
@@ -119,6 +100,7 @@ function CompScheduleCoor() {
   const handleCloseModalEdit = () => {
     setShowModalEdit(false);
     setTimeSlotSelected(null);
+    handleQuerySchedule();
   };
 
   return (
@@ -252,7 +234,17 @@ function CompScheduleCoor() {
                   </td>
                   {Array.isArray(schedule[time]) &&
                     schedule[time].map((activity) => (
-                      <td key={activity.SCHEDULE_ID} onClick={()=>handleShowModalEdit(activity)}>
+                      <td
+                        style={{ cursor: "pointer" }}
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.backgroundColor = "lightblue")
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.backgroundColor = "")
+                        }
+                        key={activity.SCHEDULE_DAY+'-'+activity.SCHEDULE_START_TIME}
+                        onClick={() => handleShowModalEdit(activity)}
+                      >
                         {activity.COMPETENCE_NAME} {activity.ENVIRONMENT_NAME}
                       </td>
                     ))}
@@ -263,10 +255,22 @@ function CompScheduleCoor() {
         </div>
         <div className="col-1"></div>
       </div>
-      {showModalEdit && <CompEditTimeSlot handleClose={handleCloseModalEdit} timeSlot={timeSlotSelected} initProgram={program}/>}
-
+      {showModalEdit && (
+        <CompEditTimeSlot
+          handleClose={handleCloseModalEdit}
+          timeSlot={timeSlotSelected}
+          initProgram={program}
+          iniPeriod={academicPeriod}
+        />
+      )}
     </>
   );
 }
 
 export default CompScheduleCoor;
+/* <td
+  style={{ cursor: "pointer" }}
+  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "lightblue")}
+  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "")}
+  onClick={() => handleShowModalEdit(null)}
+></td>; */

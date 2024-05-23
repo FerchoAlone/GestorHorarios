@@ -14,6 +14,7 @@ import CompCreateEnvironment from "./views/viewsEnvironment/CompCreateEnvironmen
 import CompQueryEnvironment from "./views/viewsEnvironment/CompQueryEnvironment";
 import NotFound from "./views/NotFound";
 import CompScheduleCoor from "./views/viewsSchedule/CompScheduleCoor";
+import CompViewTeacher from "./views/viewsSchedule/CompViewTeacher";
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/managementEnvironment" element={<Management name="Ambiente" compCreate={<CompCreateEnvironment/>} compQuery={<CompQueryEnvironment/>} />}></Route>
           <Route path="/managementAcademicPeriod" element={<Management name="Periodo academico" compCreate={<CompCreatePeriod/>} compQuery={<CompConsultPeriod/>} />}></Route>
           <Route path="/managementSchedule" element={<CompScheduleCoor/>}></Route>
+          <Route path="/teacherSchedule" element={<CompViewTeacher/>}></Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -41,14 +41,15 @@ routerSchedule.post(pathBase + "createTimeSlot", async (req, res) => {
 });
 
 routerSchedule.post(pathBase + "updateTimeSlot", async (req, res) => {
-   const {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION,SCHEDULE_ID} = req.body;
+  const {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION,SCHEDULE_ID} = req.body;
   const timeSlot = {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION,SCHEDULE_ID};
   const response = await updateTimeSlot(timeSlot);
   res.send(response);
 });
 
-routerSchedule.delete(pathBase + "deleteTimeSlot", async (req, res) => {
-    const { SCHEDULE_ID } = req.body;
+routerSchedule.delete(pathBase + "deleteTimeSlot/:SCHEDULE_ID", async (req, res) => {
+    const { SCHEDULE_ID } = req.params;
+    console.log(SCHEDULE_ID);
     const response = await deleteTimeSlot(SCHEDULE_ID);
     res.send(response);
 });

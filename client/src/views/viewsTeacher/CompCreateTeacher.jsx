@@ -1,31 +1,37 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 function CompCreateTeacher() {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
-  const [idType, setIdType] = useState("");
+  const [typeIdentification, setIdType] = useState("");
   const [identification, setIdentification] = useState("");
-  const [teacherType, setTeacherType] = useState("");
-  const [contractType, setContractType] = useState("");
+  const [type, settype] = useState("");
+  const [typeContract, settypeContract] = useState("");
   const [area, setArea] = useState("");
 
-  const handleSubmit = (e) => {
+  const store = async (e) => {
     e.preventDefault();
-    // Aquí puedes manejar la lógica de envío del formulario
-    console.log({
+    const response = await axios.post("http://localhost:3001/teacher/createTeacher", {
       name,
       lastname,
-      idType,
+      typeIdentification,
       identification,
-      teacherType,
-      contractType,
+      type,
+      typeContract,
       area,
+      status: 1,
     });
+    if (response.data.state === "SUCCES") {
+      alert(response.data.message);
+    } else {
+      alert(response.data.message);
+    }
   };
 
   return (
     <div className="container ">
-      <form onSubmit={handleSubmit} className="border border-dark rounded p-4">
+      <form onSubmit={(e) => store(e)} className="border border-dark rounded p-4">
         <div className="mb-3 row">
           <label className="col-sm-3 col-form-label">Nombre:</label>
           <div className="col-sm-9">
@@ -36,6 +42,7 @@ function CompCreateTeacher() {
               onChange={(e) => setName(e.target.value)}
               required
               minLength="2"
+              maxLength="50"
             />
           </div>
         </div>
@@ -49,6 +56,7 @@ function CompCreateTeacher() {
               onChange={(e) => setLastname(e.target.value)}
               required
               minLength="2"
+              maxLength="50"
             />
           </div>
         </div>
@@ -61,7 +69,7 @@ function CompCreateTeacher() {
                 className="form-check-input"
                 name="idType"
                 value="C.C"
-                checked={idType === "C.C"}
+                checked={typeIdentification === "C.C"}
                 onChange={() => setIdType("C.C")}
                 required
               />
@@ -73,7 +81,7 @@ function CompCreateTeacher() {
                 className="form-check-input"
                 name="idType"
                 value="Pasaporte"
-                checked={idType === "Pasaporte"}
+                checked={typeIdentification === "Pasaporte"}
                 onChange={() => setIdType("Pasaporte")}
                 required
               />
@@ -91,6 +99,7 @@ function CompCreateTeacher() {
               onChange={(e) => setIdentification(e.target.value)}
               required
               pattern="\d+"
+              maxLength="15"
             />
           </div>
         </div>
@@ -101,10 +110,10 @@ function CompCreateTeacher() {
               <input
                 type="radio"
                 className="form-check-input"
-                name="teacherType"
+                name="type"
                 value="Tecnico"
-                checked={teacherType === "Tecnico"}
-                onChange={() => setTeacherType("Tecnico")}
+                checked={type === "Tecnico"}
+                onChange={() => settype("Tecnico")}
                 required
               />
               <label className="form-check-label">Técnico</label>
@@ -113,10 +122,10 @@ function CompCreateTeacher() {
               <input
                 type="radio"
                 className="form-check-input"
-                name="teacherType"
+                name="type"
                 value="Profesional"
-                checked={teacherType === "Profesional"}
-                onChange={() => setTeacherType("Profesional")}
+                checked={type === "Profesional"}
+                onChange={() => settype("Profesional")}
                 required
               />
               <label className="form-check-label">Profesional</label>
@@ -130,10 +139,10 @@ function CompCreateTeacher() {
               <input
                 type="radio"
                 className="form-check-input"
-                name="contractType"
+                name="typeContract"
                 value="PT"
-                checked={contractType === "PT"}
-                onChange={() => setContractType("PT")}
+                checked={typeContract === "PT"}
+                onChange={() => settypeContract("PT")}
                 required
               />
               <label className="form-check-label">PT - Planta</label>
@@ -142,10 +151,10 @@ function CompCreateTeacher() {
               <input
                 type="radio"
                 className="form-check-input"
-                name="contractType"
+                name="typeContract"
                 value="CNT"
-                checked={contractType === "CNT"}
-                onChange={() => setContractType("CNT")}
+                checked={typeContract === "CNT"}
+                onChange={() => settypeContract("CNT")}
                 required
               />
               <label className="form-check-label">CNT - Contratista</label>

@@ -1,17 +1,24 @@
-import React, { useEffect, useState,useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Select from "react-select";
 
-const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram }) => {
-  const [academicPeriod] = useState(timeSlot.PERIOD_NAME);
+const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
+  
+  const creating=timeSlot.SCHEDULE_ID===-1? true : false;
+  const [academicPeriod] = useState(iniPeriod.PERIOD_NAME);
   const [program] = useState(initProgram.PROGRAM_NAME);
-  const [environment, setEnvironment] = useState(
-    timeSlot.ENVIRONMENT_NAME + " - " + timeSlot.ENVIRONMENT_LOCATION
-  );
-  const [teacher, setTeacher] = useState(
-    timeSlot.TEACHER_FIRSTNAME + " " + timeSlot.TEACHER_LASTNAME
-  );
-  const [competence, setCompetence] = useState({COMPETENCE_NAME:timeSlot.COMPETENCE_NAME,COMPETENCE_ID:timeSlot.COMPETENCE_ID});
+  const [environment, setEnvironment] = useState({
+    value: timeSlot.ENVIRONMENT_ID? timeSlot.ENVIRONMENT_ID : -1,
+    label: timeSlot.ENVIRONMENT_NAME && timeSlot.ENVIRONMENT_LOCATION? timeSlot.ENVIRONMENT_NAME + " - " + timeSlot.ENVIRONMENT_LOCATION : "Sin ambiente asignado",
+  });
+  const [teacher, setTeacher] = useState({
+    value: timeSlot.TEACHER_ID? timeSlot.TEACHER_ID : -1,
+    label: timeSlot.TEACHER_LASTNAME && timeSlot.TEACHER_FIRSTNAME? timeSlot.TEACHER_LASTNAME + " " + timeSlot.TEACHER_FIRSTNAME : "Sin docente asignado",
+  });
+  const [competence, setCompetence] = useState({
+    COMPETENCE_NAME: timeSlot.COMPETENCE_NAME,
+    COMPETENCE_ID: timeSlot.COMPETENCE_ID,
+  });
   const [duration, setDuration] = useState(timeSlot.SCHEDULE_DURATION);
 
   const [competences, setCompetences] = useState([]);
@@ -24,7 +31,21 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram }) => {
       `http://localhost:3001/apiProgramCompetences/getCompetencesByProgram/${id}`
     );
     setCompetences(response.data["1"]);
-  },[initProgram.PROGRAM_ID]);
+  }, [initProgram.PROGRAM_ID]);
+
+  const getTeachers = useCallback(async () => {
+    const response = await axios.get(
+      "http://localhost:3001/teacher/getActiveTeachers"
+    );
+    setTeachers(response.data);
+  }, []);
+
+  const getEnvironments = useCallback(async () => {
+    const response = await axios.get(
+      "http://localhost:3001/environment/getEnvironmentsActived"
+    );
+    setEnvironments(response.data);
+  }, []);
 
   const handleCompetenceChange = ({ value }) => {
     setCompetence(
@@ -32,14 +53,74 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram }) => {
     );
   };
 
+  const handleTeacherChange = ({ value }) => {
+    setTeacher(teachers.find((teacher) => teacher.TEACHER_ID === value));
+  };
+
+  const handleEnvironmentChange = ({ value }) => {
+    console.log(value);
+    setEnvironment(
+      environments.find((environment) => environment.ENVIRONMENT_ID === value)
+    );
+  };
+
+  const createSchedule = async () => {
+    const data = {
+      ENVIRONMENT_ID:environment.ENVIRONMENT_ID,
+      TEACHER_ID:teacher.TEACHER_ID,  
+      PROGRAM_ID:initProgram.PROGRAM_ID, 
+      COMPETENCE_ID:competence.COMPETENCE_ID, 
+      PERIOD_ID:iniPeriod.PERIOD_ID,
+      SCHEDULE_DAY:timeSlot.SCHEDULE_DAY,
+      SCHEDULE_START_TIME:timeSlot.SCHEDULE_START_TIME, 
+      SCHEDULE_DURATION:duration
+    };
+    console.log(data);
+    if(!data.COMPETENCE_ID || !data.ENVIRONMENT_ID===-1 || !data.TEACHER_ID===-1 || !data.PROGRAM_ID || !data.PERIOD_ID){
+     alert("Por favor complete todos los campos");
+     return;
+    }
+    const response = await axios.post("http://localhost:3001/schedule/createTimeSlot", data);
+    alert(response.data.message);
+    handleClose();
+  }
+  const updateSchedule = async () => {
+    const data = {
+      ENVIRONMENT_ID:environment.value,
+      TEACHER_ID:teacher.TEACHER_ID || teacher.value,  
+      PROGRAM_ID:initProgram.PROGRAM_ID, 
+      COMPETENCE_ID:competence.COMPETENCE_ID, 
+      PERIOD_ID:iniPeriod.PERIOD_ID,
+      SCHEDULE_DAY:timeSlot.SCHEDULE_DAY,
+      SCHEDULE_START_TIME:timeSlot.SCHEDULE_START_TIME, 
+      SCHEDULE_DURATION:duration,
+      SCHEDULE_ID:timeSlot.SCHEDULE_ID
+    };
+    const response =await axios.post("http://localhost:3001/schedule/updateTimeSlot", data);
+    alert(response.data.message);
+    handleClose();
+  }
+
   const handleSave = (e) => {
     e.preventDefault();
-    // Aquí puedes manejar la lógica de guardar la franja horaria
+    if(creating){
+      createSchedule();
+    }else{
+      updateSchedule();
+    }
   };
+
+  const handleDelete = async () => {
+    const response = await axios.delete('http://localhost:3001/schedule/deleteTimeSlot/'+timeSlot.SCHEDULE_ID);
+    alert(response.data.message);
+    handleClose();
+  }
 
   useEffect(() => {
     getCompetences();
-  }, [getCompetences]);
+    getTeachers();
+    getEnvironments();
+  }, [getCompetences, getTeachers, getEnvironments]);
 
   return (
     <div className="modal d-block" tabIndex="-1" role="dialog">
@@ -77,46 +158,46 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram }) => {
               </div>
               <div className="mb-3">
                 <label className="form-label">Ambiente:</label>
-                <div className="input-group">
-                  <select
-                    className="form-select"
-                    value={environment}
-                    onChange={(e) => setEnvironment(e.target.value)}
-                    readOnly
-                  >
-                    <option value="Laboratorio 4 - FET">
-                      Laboratorio 4 - FET
-                    </option>
-                    <option value="Laboratorio 3 - FET">
-                      Laboratorio 3 - FET
-                    </option>
-                  </select>
-                  <span className="input-group-text">
-                    <i className="fas fa-search"></i>
-                  </span>
-                </div>
+                <Select
+                  placeholder="Seleccionar docente"
+                  defaultValue={environment}
+                  options={environments.map((environment) => {
+                    return {
+                      value: environment.ENVIRONMENT_ID,
+                      label:
+                      environment.ENVIRONMENT_NAME +
+                        " - " +
+                        environment.ENVIRONMENT_LOCATION,
+                    };
+                  })}
+                  onChange={handleEnvironmentChange}
+                ></Select>
               </div>
               <div className="mb-3">
                 <label className="form-label">Docente:</label>
-                <div className="input-group">
-                  <select
-                    className="form-select"
-                    value={teacher}
-                    onChange={(e) => setTeacher(e.target.value)}
-                  >
-                    <option value="Francisco Olarte">Francisco Olarte</option>
-                    <option value="Otro Docente">Otro Docente</option>
-                  </select>
-                  <span className="input-group-text">
-                    <i className="fas fa-search"></i>
-                  </span>
-                </div>
+                <Select
+                  placeholder="Seleccionar docente"
+                  defaultValue={teacher}
+                  options={teachers.map((teacher) => {
+                    return {
+                      value: teacher.TEACHER_ID,
+                      label:
+                        teacher.TEACHER_LASTNAME +
+                        " " +
+                        teacher.TEACHER_FIRSTNAME,
+                    };
+                  })}
+                  onChange={handleTeacherChange}
+                ></Select>
               </div>
               <div className="mb-3">
                 <label className="form-label">Competencia:</label>
                 <Select
                   placeholder="Seleccionar competencia"
-                  defaultValue={{value:competence.COMPETENCE_ID,label:competence.COMPETENCE_NAME}}
+                  defaultValue={{
+                    value: competence.COMPETENCE_ID,
+                    label: competence.COMPETENCE_NAME,
+                  }}
                   options={competences.map((competence) => {
                     return {
                       value: competence.COMPETENCE_ID,
@@ -139,15 +220,15 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram }) => {
               </div>
               <div className="d-flex justify-content-between">
                 <button type="submit" className="btn btn-primary">
-                  Guardar
+                  {creating? "Crear franja" : "Actualizar franja"}
                 </button>
-                <button
+                {!creating?<button
                   type="button"
                   className="btn btn-danger"
-                  onClick={handleClose}
+                  onClick={handleDelete}
                 >
                   Eliminar franja
-                </button>
+                </button>:<></>}
                 <button
                   type="button"
                   className="btn btn-secondary"

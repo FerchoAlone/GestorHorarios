@@ -15,8 +15,8 @@ routerTeacher.get(pathBase + "getActiveTeachers", async (req, res) => {
     res.json(response);
 });
 
-routerTeacher.get(pathBase + "getById", async (req, res) => {
-    const {id} = req.body;
+routerTeacher.get(pathBase + "getById/:id", async (req, res) => {
+    const {id} = req.params;
     const teacher = await getTeacherById(id);
     res.json(teacher);
 });

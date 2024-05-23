@@ -46,10 +46,10 @@ function Management({name, compCreate, compQuery}) {
 
             <div className='row'>
                 <div className="col-md-3 p-2 h-200 d-inline-block border-end border-dark " style={{ height: "70vh" }}>
-                    <div className="nav-link p-4 fs-5" onClick={showCreate} >
+                    <div className="nav-link p-4 fs-5" onClick={showCreate} style={{ cursor: "pointer" }} >
                         <i className="fas fa-plus" ></i> Crear {name}
                     </div>
-                    <div className="nav-link p-4 fs-5" onClick={showQuery} >
+                    <div className="nav-link p-4 fs-5" onClick={showQuery}  style={{ cursor: "pointer" }}>
                         <i className="fas fa-search"></i> Consultar {name}
                     </div>
                 </div>

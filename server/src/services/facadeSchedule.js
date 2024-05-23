@@ -93,7 +93,7 @@ const verifyHoursTeacher = async (timeSlot, forUpdate = false) => {
   );
   var totalWeeklyHours = 0;
   for (var i = 0; i < weeklyData.length; i++) {
-    if (forUpdate && dailyData[i].SCHEDULE_ID == parseInt(timeSlot.SCHEDULE_ID))
+    if (forUpdate && weeklyData[i].SCHEDULE_ID == parseInt(timeSlot.SCHEDULE_ID))
       continue;
     totalWeeklyHours += parseInt(weeklyData[i].SCHEDULE_DURATION);
   }
@@ -199,7 +199,7 @@ export const updateTimeSlot = async (timeSlot) => {
       message: "Horario actualizado exitosamente",
     };
   } catch (error) {
-    if (e.errno == 1048) {
+    if (error.errno == 1048) {
       return {
         state: "ERROR",
         message:
@@ -235,67 +235,66 @@ export const getScheduleByPeriodProgramEnvironment = async (
   PROGRAM_ID,
   ENVIRONMENT_ID
 ) => {
-  
   const [timeslots] = await pool.query(
-    "SELECT sch.*, env.ENVIRONMENT_NAME AS ENVIRONMENT_NAME, env.ENVIRONMENT_LOCATION AS ENVIRONMENT_LOCATION, tea.TEACHER_FIRSTNAME AS TEACHER_FIRSTNAME, tea.TEACHER_LASTNAME AS TEACHER_LASTNAME, com.COMPETENCE_NAME AS COMPETENCE_NAME FROM SCHEDULE AS sch JOIN ENVIRONMENT AS env ON sch.ENVIRONMENT_ID = env.ENVIRONMENT_ID JOIN TEACHER AS tea ON sch.TEACHER_ID = tea.TEACHER_ID JOIN COMPETENCE AS com ON sch.COMPETENCE_ID = com.COMPETENCE_ID WHERE sch.PERIOD_ID = ? AND sch.PROGRAM_ID = ? AND sch.ENVIRONMENT_ID = ? ORDER BY sch.SCHEDULE_START_TIME",
+    "SELECT sch.*, env.ENVIRONMENT_NAME AS ENVIRONMENT_NAME, env.ENVIRONMENT_LOCATION AS ENVIRONMENT_LOCATION, tea.TEACHER_FIRSTNAME AS TEACHER_FIRSTNAME, tea.TEACHER_LASTNAME AS TEACHER_LASTNAME, com.COMPETENCE_NAME AS COMPETENCE_NAME FROM SCHEDULE AS sch JOIN ENVIRONMENT AS env ON sch.ENVIRONMENT_ID = env.ENVIRONMENT_ID JOIN TEACHER AS tea ON sch.TEACHER_ID = tea.TEACHER_ID JOIN COMPETENCE AS com ON sch.COMPETENCE_ID = com.COMPETENCE_ID WHERE sch.PERIOD_ID = ? AND sch.PROGRAM_ID = ? AND sch.ENVIRONMENT_ID = ? ORDER BY sch.SCHEDULE_START_TIME ASC, sch.SCHEDULE_DAY ASC",
     [PERIOD_ID, PROGRAM_ID, ENVIRONMENT_ID]
   );
-
-  // const scheduleByDays = {};
-  // timeslots.forEach((schedule) => {
-  //   const day = schedule.SCHEDULE_DAY;
-  //   if (!scheduleByDays[day]) {
-  //     scheduleByDays[day] = [];
-  //   }
-  //   scheduleByDays[day].push(schedule);
-  // });
-
-  // return scheduleByDays;
-  const scheduleByHours ={};
-  const hoursById = {0:"07:00",1:"08:00",2:"09:00",3:"10:00",4:"11:00",5:"12:00",6:"13:00",7:"14:00",8:"15:00",9:"16:00",10:"17:00",11:"18:00",12:"19:00",13:"20:00",14:"21:00"};
-  const hoursByNum = {7:"07:00",8:"08:00",9:"09:00",10:"10:00",11:"11:00",12:"12:00",13:"13:00",14:"14:00",15:"15:00",16:"16:00",17:"17:00",18:"18:00",19:"19:00",20:"20:00",21:"21:00"};
-  for (var i = 0; i < 15; i++) {
-    scheduleByHours[hoursById[i]] = [];
-  }
-
-  timeslots.forEach((schedule)=>{
-    const hourI = parseInt(schedule.SCHEDULE_START_TIME);
-    for(var i = 0; i < schedule.SCHEDULE_DURATION; i++){
-      const currentHour=hourI+i;
-      scheduleByHours[hoursByNum[currentHour]].push(schedule);
-    }
-  });
-
-  return scheduleByHours;
+  
+  return sortSchedule(timeslots);
 };
 
 export const getScheduleByTeacherAndPeriod = async (PERIOD_ID, TEACHER_ID) => {
   const [timeslots] = await pool.query(
-    "SELECT sch.*, env.ENVIRONMENT_NAME AS ENVIRONMENT_NAME, env.ENVIRONMENT_LOCATION AS ENVIRONMENT_LOCATION, tea.TEACHER_FIRSTNAME AS TEACHER_FIRSTNAME, tea.TEACHER_LASTNAME AS TEACHER_LASTNAME, com.COMPETENCE_NAME AS COMPETENCE_NAME FROM SCHEDULE AS sch JOIN ENVIRONMENT AS env ON sch.ENVIRONMENT_ID = env.ENVIRONMENT_ID JOIN TEACHER AS tea ON sch.TEACHER_ID = tea.TEACHER_ID JOIN COMPETENCE AS com ON sch.COMPETENCE_ID = com.COMPETENCE_ID WHERE sch.PERIOD_ID = ? AND sch.TEACHER_ID = ? ORDER BY sch.SCHEDULE_START_TIME",
+    "SELECT sch.*, env.ENVIRONMENT_NAME AS ENVIRONMENT_NAME, env.ENVIRONMENT_LOCATION AS ENVIRONMENT_LOCATION, tea.TEACHER_FIRSTNAME AS TEACHER_FIRSTNAME, tea.TEACHER_LASTNAME AS TEACHER_LASTNAME, com.COMPETENCE_NAME AS COMPETENCE_NAME FROM SCHEDULE AS sch JOIN ENVIRONMENT AS env ON sch.ENVIRONMENT_ID = env.ENVIRONMENT_ID JOIN TEACHER AS tea ON sch.TEACHER_ID = tea.TEACHER_ID JOIN COMPETENCE AS com ON sch.COMPETENCE_ID = com.COMPETENCE_ID WHERE sch.PERIOD_ID = ? AND sch.TEACHER_ID = ? ORDER BY sch.SCHEDULE_START_TIME ASC, sch.SCHEDULE_DAY ASC",
     [PERIOD_ID, TEACHER_ID]
   );
-  // const scheduleByDays = {};
-  // timeslots.forEach((schedule) => {
-  //   const day = schedule.SCHEDULE_DAY;
-  //   if (!scheduleByDays[day]) {
-  //     scheduleByDays[day] = [];
-  //   }
-  //   scheduleByDays[day].push(schedule);
-  // });
-  const scheduleByHours ={};
-  const hoursById = {0:"07:00",1:"08:00",2:"09:00",3:"10:00",4:"11:00",5:"12:00",6:"13:00",7:"14:00",8:"15:00",9:"16:00",10:"17:00",11:"18:00",12:"19:00",13:"20:00",14:"21:00"};
-  const hoursByNum = {7:"07:00",8:"08:00",9:"09:00",10:"10:00",11:"11:00",12:"12:00",13:"13:00",14:"14:00",15:"15:00",16:"16:00",17:"17:00",18:"18:00",19:"19:00",20:"20:00",21:"21:00"};
-  for (var i = 0; i < 15; i++) {
-    scheduleByHours[hoursById[i]] = [];
+
+  return sortSchedule(timeslots);
+};
+
+const sortSchedule = (timeslots) => {
+  const scheduleByHours = {};
+
+  const hoursByNum = {
+    7: "07:00",
+    8: "08:00",
+    9: "09:00",
+    10: "10:00",
+    11: "11:00",
+    12: "12:00",
+    13: "13:00",
+    14: "14:00",
+    15: "15:00",
+    16: "16:00",
+    17: "17:00",
+    18: "18:00",
+    19: "19:00",
+    20: "20:00",
+    21: "21:00",
+  };
+  for (var i = 7; i < 22; i++) {
+    scheduleByHours[hoursByNum[i]] = [];
   }
 
-  timeslots.forEach((schedule)=>{
-    const hourI = parseInt(schedule.SCHEDULE_START_TIME);
-    for(var i = 0; i < schedule.SCHEDULE_DURATION; i++){
-      const currentHour=hourI+i;
-      scheduleByHours[hoursByNum[currentHour]].push(schedule);
+  for (var dia = 1; dia < 7; dia++) {
+    for (var hora = 7; hora < 22; hora++) {
+      var isfilled = false;
+      timeslots.forEach((timeslot) => {
+        if (parseInt(timeslot.SCHEDULE_DAY) === dia) {
+          for (var i = 0; i < timeslot.SCHEDULE_DURATION; i++) {
+            if (parseInt(timeslot.SCHEDULE_START_TIME) + i === hora) {
+              isfilled = true;
+              scheduleByHours[hoursByNum[hora]].push(timeslot);
+              break;
+            }
+          }
+        }
+        if (isfilled) return;
+      });
+      if (!isfilled) {
+        scheduleByHours[hoursByNum[hora]].push({SCHEDULE_ID:-1,SCHEDULE_DAY:dia, SCHEDULE_START_TIME:hora});
+      }
     }
-  });
-  
+  }
   return scheduleByHours;
 };

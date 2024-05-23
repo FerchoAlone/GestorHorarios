@@ -1,23 +1,13 @@
 import React from "react";
 
-function CompInformationTeacher({ handleClose, id }) {
-  // Información simulada de un docente
-  const teacherInfo = {
-    code: id,
-    name: "Juan",
-    lastname: "Pérez",
-    idType: "C.C",
-    identification: "123456789",
-    contractType: "PT - Planta",
-    area: "Ciencias",
-  };
+function CompInformationTeacher({ handleClose, teacher }) {
 
   return (
     <div className="modal d-block" tabIndex="-1" role="dialog">
       <div className="modal-dialog modal-dialog-centered" role="document">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">Información del Docente {id}</h5>
+            <h5 className="modal-title">Información del Docente {teacher.TEACHER_ID}</h5>
             <button
               type="button"
               className="btn-close"
@@ -29,27 +19,27 @@ function CompInformationTeacher({ handleClose, id }) {
             <div className="container">
               <div className="mb-2 text-center">
                 <strong>Nombre: </strong>
-                {teacherInfo.name}
+                {teacher.TEACHER_FIRSTNAME}
               </div>
               <div className="mb-2 text-center">
                 <strong>Apellido: </strong>
-                {teacherInfo.lastname}
+                {teacher.TEACHER_LASTNAME}
               </div>
               <div className="mb-2 text-center">
                 <strong>Tipo Identificación: </strong>
-                {teacherInfo.idType}
+                {teacher.TEACHER_IDTYPE}
               </div>
               <div className="mb-2 text-center">
                 <strong>Identificación: </strong>
-                {teacherInfo.identification}
+                {teacher.TEACHER_IDNUMBER}
               </div>
               <div className="mb-2 text-center">
                 <strong>Tipo Contrato: </strong>
-                {teacherInfo.contractType}
+                {teacher.TEACHER_CONTRACTTYPE}
               </div>
               <div className="mb-2 text-center">
                 <strong>Área: </strong>
-                {teacherInfo.area}
+                {teacher.TEACHER_AREA}
               </div>
             </div>
           </div>
