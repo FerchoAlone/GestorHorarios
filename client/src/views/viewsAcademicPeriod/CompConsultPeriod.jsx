@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext ,useCallback} from "react";
 import axios from "axios";
 
 import CompInfoAcademicPeriod from "./CompInfoAcademicPeriod";
 import CompEditPeriodAcademic from "./CompEditPeriodAcademic";
+import { AuthContext } from "../AuthProvider";
 
 const CompConsultPeriod = () => {
+  const {logout}=useContext(AuthContext)
   const [periodAcademic, setPeriodAcademic] = useState({});
   const [showModalInfo, setShowModalInfo] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
@@ -33,18 +35,27 @@ const CompConsultPeriod = () => {
   };
 
   // Función para obtener todos los periodos académicos desde el backend
-  const fetchPeriods = async () => {
+  const fetchPeriods = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:3001/academicPeriod/getAll");
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:3001/academicPeriod/getAll",{
+        headers:{
+          'Authorization':'bearer '+token
+        }
+      });
+      if(response.data.state==="TOKEN"){
+        logout();
+        return;
+      }
       setPeriods(response.data); // Actualizar el estado con los periodos académicos obtenidos
     } catch (error) {
       console.error("Error fetching periods:", error);
     }
-  };
+  },[logout]);
 
   useEffect(() => {
     fetchPeriods(); // Llamar a fetchPeriods al montar el componente
-  }, []); // El segundo argumento es un array vacío para que se ejecute solo una vez al montar el componente
+  }, [fetchPeriods]); // El segundo argumento es un array vacío para que se ejecute solo una vez al montar el componente
 
   // Resto del código del componente aquí...
 

@@ -1,11 +1,11 @@
 import { Router } from "express"; 
 import {getAllAcademicPeriod, createAcademicPeriod, updateAcademicPeriod, getAcademicPeriodById, changeAcademicPeriod, getActiveAcademicPeriod} from "../services/serviceAcademicPeriod.js"
-
+import { authMiddleware } from "../services/serviceLogin.js";
 
 const routerAcademicPeriod = Router();
 const pathBase = '/academicPeriod/';
 
-routerAcademicPeriod.get(pathBase + 'getAll',async (req, res) =>{
+routerAcademicPeriod.get(pathBase + 'getAll',authMiddleware,async (req, res) =>{
     try {
         const academicPeriod = await getAllAcademicPeriod();
         res.send(academicPeriod);

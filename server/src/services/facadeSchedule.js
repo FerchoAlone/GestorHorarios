@@ -2,26 +2,26 @@ import pool from "../database.js";
 import { getTeacherById } from "./serviceTeacher.js";
 
 const verifyEnvironmentAvailability = async (timeSlot, forUpdate = false) => {
-  var [response] = [];
-  if (forUpdate) {
-    [response] = await pool.query(
-      "SELECT * FROM schedule WHERE ENVIRONMENT_ID = ? AND SCHEDULE_DAY = ? AND SCHEDULE_ID != ?",
-      [timeSlot.ENVIRONMENT_ID, timeSlot.SCHEDULE_DAY, timeSlot.SCHEDULE_ID]
-    );
-  } else {
-    [response] = await pool.query(
-      "SELECT * FROM schedule WHERE ENVIRONMENT_ID = ? AND SCHEDULE_DAY = ?",
-      [timeSlot.ENVIRONMENT_ID, timeSlot.SCHEDULE_DAY]
-    );
-  }
+
+  const query = forUpdate
+    ? "SELECT * FROM schedule WHERE ENVIRONMENT_ID = ? AND SCHEDULE_DAY = ? AND SCHEDULE_ID != ?"
+    : "SELECT * FROM schedule WHERE ENVIRONMENT_ID = ? AND SCHEDULE_DAY = ?";
+
+  const params = forUpdate
+    ? [timeSlot.ENVIRONMENT_ID, timeSlot.SCHEDULE_DAY, timeSlot.SCHEDULE_ID]
+    : [timeSlot.ENVIRONMENT_ID, timeSlot.SCHEDULE_DAY];
+
+  const [response] = await pool.query(query, params);
+
   for (var i = 0; i < response.length; i++) {
+    console.log(response[i])
     const duration =
       parseInt(response[i].SCHEDULE_START_TIME) +
       parseInt(response[i].SCHEDULE_DURATION);
     if (
       parseInt(timeSlot.SCHEDULE_START_TIME) >=
-        parseInt(response[i].SCHEDULE_START_TIME) &&
-      timeSlot.SCHEDULE_START_TIME < duration
+      parseInt(response[i].SCHEDULE_START_TIME) &&
+      timeSlot.SCHEDULE_START_TIME <= duration
     ) {
       return false;
     }
@@ -239,7 +239,7 @@ export const getScheduleByPeriodProgramEnvironment = async (
     "SELECT sch.*, env.ENVIRONMENT_NAME AS ENVIRONMENT_NAME, env.ENVIRONMENT_LOCATION AS ENVIRONMENT_LOCATION, tea.TEACHER_FIRSTNAME AS TEACHER_FIRSTNAME, tea.TEACHER_LASTNAME AS TEACHER_LASTNAME, com.COMPETENCE_NAME AS COMPETENCE_NAME FROM SCHEDULE AS sch JOIN ENVIRONMENT AS env ON sch.ENVIRONMENT_ID = env.ENVIRONMENT_ID JOIN TEACHER AS tea ON sch.TEACHER_ID = tea.TEACHER_ID JOIN COMPETENCE AS com ON sch.COMPETENCE_ID = com.COMPETENCE_ID WHERE sch.PERIOD_ID = ? AND sch.PROGRAM_ID = ? AND sch.ENVIRONMENT_ID = ? ORDER BY sch.SCHEDULE_START_TIME ASC, sch.SCHEDULE_DAY ASC",
     [PERIOD_ID, PROGRAM_ID, ENVIRONMENT_ID]
   );
-  
+
   return sortSchedule(timeslots);
 };
 
@@ -292,7 +292,7 @@ const sortSchedule = (timeslots) => {
         if (isfilled) return;
       });
       if (!isfilled) {
-        scheduleByHours[hoursByNum[hora]].push({SCHEDULE_ID:-1,SCHEDULE_DAY:dia, SCHEDULE_START_TIME:hora});
+        scheduleByHours[hoursByNum[hora]].push({ SCHEDULE_ID: -1, SCHEDULE_DAY: dia, SCHEDULE_START_TIME: hora });
       }
     }
   }

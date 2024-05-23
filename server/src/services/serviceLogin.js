@@ -43,7 +43,7 @@ export const verifyCredentials = async (credentials) => {
 export const authMiddleware = (req, res, next) => {
   // Obtener el token de los encabezados de la solicitud
   const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
-  
+  console.log(token);
   if (!token) {
     return res.send({state:"TOKEN",message:"No token provided"});
   }

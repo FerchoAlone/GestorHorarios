@@ -14,7 +14,6 @@ function CompHomeCoordinator() {
         const GetCoordinator = async () => {
                 const id = localStorage.getItem("id");
                 const response = await axios.get("http://localhost:3001/teacher/getById/"+id);
-                console.log(response);
                 setCoordinator(response.data);
         };
         GetCoordinator();
