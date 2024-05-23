@@ -1,12 +1,13 @@
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState,useContext} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "./AuthProvider";
 
 function CompHomeCoordinator() {
     const [coordinator, setCoordinator] = useState({});
     useEffect(() => {
         const GetCoordinator = async () => {
-                const id = 5;
+                const id = localStorage.getItem("id");
                 const response = await axios.get("http://localhost:3001/teacher/getById/"+id);
                 console.log(response);
                 setCoordinator(response.data);
@@ -29,9 +30,9 @@ function CompHomeCoordinator() {
     const goSchedule = () => {
         navigator('/managementSchedule');
     }
-    const logout = () => {
-        navigator('/login');
-    }
+
+    const {logout} = useContext(AuthContext);
+
 
     return (
         <div className="container-fluid p-3">

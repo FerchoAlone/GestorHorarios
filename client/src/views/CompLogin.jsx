@@ -1,6 +1,7 @@
 import { useState,useContext } from "react";
 import { AuthContext } from "./AuthProvider";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2/dist/sweetalert2.js'
 
 function CompLogin() {
   const [user, setUser ] = useState('');
@@ -11,13 +12,17 @@ function CompLogin() {
     //TODO: HACER VALIDACIONES DE CAMPOS
     e.preventDefault();
     const res= await login(user, password);
+    await Swal.fire({
+        text: res.message,
+        icon: res.status?'success':'error',
+        timer:750,
+        showConfirmButton:false
+      });
     if(res.status){
       if(res.rol==="COORDINADOR"){
-        console.log("Permiso de coordinador");
         navigator('/management')
       }else{
-        console.log("Permiso de docente");
-        navigator('/docente')
+        navigator('/teacherSchedule')
       }
       
     }

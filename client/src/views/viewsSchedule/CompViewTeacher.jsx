@@ -1,9 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import Select from "react-select";
-
-import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../AuthProvider";
 
 
 const CompViewTeacher = () => {
@@ -24,7 +23,7 @@ const CompViewTeacher = () => {
     "20:00 ": [],
     "21:00 ": [],
   });
-  const scheduleHours=["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"];
+  const scheduleHours = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
   const [academicPeriods, setAcademicPeriods] = useState([]);
   const [academicPeriod, setAcademicPeriod] = useState([]);
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -33,7 +32,7 @@ const CompViewTeacher = () => {
   const [teacher, setTeacher] = useState({});
   useEffect(() => {
     const GetTeacher = async () => {
-      const id = 5;
+      const id = localStorage.getItem("id");;
       const response = await axios.get("http://localhost:3001/teacher/getById/" + id);
       console.log(response);
       setTeacher(response.data);
@@ -41,10 +40,7 @@ const CompViewTeacher = () => {
     GetTeacher();
   }, []);
 
-  const navigator = useNavigate()
-  const logout = () => {
-    navigator('/login');
-  }
+  const { logout } = useContext(AuthContext);
 
   const getAcademicPeriods = async () => {
     const response = await axios.get(
@@ -70,14 +66,13 @@ const CompViewTeacher = () => {
   const handleQuerySchedule = async () => {
 
     const PERIOD_ID = academicPeriod.PERIOD_ID;
-    const id = 1;
+    const TEACHER_ID = localStorage.getItem("id");
     if (!PERIOD_ID) {
       alert("Por favor seleccione todos los campos");
       return;
     }
-    const response = await axios.get("http://localhost:3001/schedule/getScheduleByTeacherAndPeriod/" + id);
+    const response = await axios.get("http://localhost:3001/schedule/getScheduleByTeacherAndPeriod/" + PERIOD_ID + "/" + TEACHER_ID);
     setSchedule(response.data);
-    console.log(response);
   };
 
 
@@ -94,7 +89,7 @@ const CompViewTeacher = () => {
           </button>
         </div>
         <div className="card-body row">
-          <div className="col-md-4">
+          <div className="col-md-3">
             <div className="d-flex flex-column align-items-center">
               {teacher.IMAGE_URL ? (
                 <img src={teacher.IMAGE_URL} alt="User" className="rounded-circle mb-3" width="100" />
@@ -124,7 +119,7 @@ const CompViewTeacher = () => {
               </div>
             </div>
           </div>
-          <div className="col-md-8">
+          <div className="col-md-9">
             <div className="row">
               <div className="col-1"></div>
               <div className="col-10">
@@ -153,7 +148,17 @@ const CompViewTeacher = () => {
                         </td>
                         {Array.isArray(schedule[time]) &&
                           schedule[time].map((activity) => (
-                            <td key={activity.SCHEDULE_ID}>
+                            <td
+                              style={{ cursor: "pointer" }}
+                              onMouseOver={(e) =>
+                                (e.currentTarget.style.backgroundColor = "lightblue")
+                              }
+                              onMouseOut={(e) =>
+                                (e.currentTarget.style.backgroundColor = "")
+                              }
+                              key={activity.SCHEDULE_DAY + '-' + activity.SCHEDULE_START_TIME}
+                              
+                            >
                               {activity.COMPETENCE_NAME} {activity.ENVIRONMENT_NAME}
                             </td>
                           ))}

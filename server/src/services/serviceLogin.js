@@ -15,7 +15,7 @@ export const verifyCredentials = async (credentials) => {
     );
     if (!response || !response.length) {
       return {
-        state: "INCORRECT",
+        state: "ERROR",
         message: "El nombre de usuario o contraseña son incorrectos",
         token: null,
       };
@@ -23,7 +23,7 @@ export const verifyCredentials = async (credentials) => {
     const user = response[0];
     dotenv.config();
     const token = jwt.sign(
-      { userPassword: user.USER_PASSWORD, userLogin: user.USER_LOGIN },
+      { userPassword: user.USER_PASSWORD, userLogin: user.USER_LOGIN,rol: user.USER_TYPE, teacherId: user.TEACHER_ID},
       process.env.SECRETWORD,
       { expiresIn: process.env.EXPIRESTOKEN }
     );
@@ -32,9 +32,10 @@ export const verifyCredentials = async (credentials) => {
       message: "Inicio de sesión exitoso",
       token: token,
       rol: user.USER_TYPE,
+      teacherId: user.TEACHER_ID
     };
   } catch (error) {
-    return { state: "ERROR", message: "Error al iniciar sesión", token: null,rol:null };
+    return { state: "ERROR", message: "Error al iniciar sesión", token: null,rol:null,teacherId:null };
   }
 };
 
@@ -44,15 +45,16 @@ export const authMiddleware = (req, res, next) => {
   const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
   
   if (!token) {
-    return res.send({state:"ERROR",message:"No token provided"});
+    return res.send({state:"TOKEN",message:"No token provided"});
   }
 
   try {
     // Verificar el token
     const decoded = jwt.verify(token,process.env.SECRETWORD); // Usa la clave secreta adecuada
+    console.log(decoded);
     //req.user = decoded; // Adjuntar el payload del token al objeto de solicitud
     next(); // Continuar con la siguiente función de middleware o la ruta
   } catch (ex) {
-    res.send({state:"ERROR",message:"No token valid"});
+    res.send({state:"TOKEN",message:"No token valid"});
   }
 };
