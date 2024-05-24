@@ -1,7 +1,7 @@
 import pool from "../database.js";
 
 export const getAllTeachers = async () => {
-  const [response] = await pool.query("SELECT * FROM teacher");
+  const [response] = await pool.query("SELECT * FROM teacher ORDER BY TEACHER_FIRSTNAME, TEACHER_LASTNAME");
   return response;
 };
 
@@ -116,7 +116,7 @@ export const changeTeacherStatus = async (id, status) => {
 
 export const getActiveTeachers = async () => {
   const [response] = await pool.query(
-    "SELECT * FROM teacher WHERE TEACHER_STATUS = 1"
+    "SELECT * FROM teacher WHERE TEACHER_STATUS = 1 ORDER BY TEACHER_FIRSTNAME, TEACHER_LASTNAME"
   );
   return response;
 };

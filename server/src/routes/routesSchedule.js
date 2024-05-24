@@ -6,6 +6,7 @@ import {
   updateTimeSlot,
   deleteTimeSlot
 } from "../services/facadeSchedule.js";
+import { authMiddleware } from "../services/serviceLogin.js";
 
 const routerSchedule = Router();
 const pathBase = "/schedule/";
@@ -33,7 +34,7 @@ routerSchedule.get(
   }
 );
 
-routerSchedule.post(pathBase + "createTimeSlot", async (req, res) => {
+routerSchedule.post(pathBase + "createTimeSlot",async (req, res) => {
   const {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION} = req.body;
   const timeSlot = {ENVIRONMENT_ID,TEACHER_ID,PROGRAM_ID,COMPETENCE_ID, PERIOD_ID,SCHEDULE_DAY,SCHEDULE_START_TIME,SCHEDULE_DURATION};
   const response = await createTimeSlot(timeSlot);

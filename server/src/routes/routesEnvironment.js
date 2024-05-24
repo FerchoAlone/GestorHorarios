@@ -8,6 +8,7 @@ import {
   getAllEnvironmentsActived,
   getEnvironmentByName,
 } from "../services/serviceEnviroment.js";
+import { authMiddleware } from "../services/serviceLogin.js";
 
 const routerEnviroment = Router();
 const pathBase = "/environment/";
@@ -26,7 +27,7 @@ routerEnviroment.get(pathBase + "getAll", async (req, res) => {
  * Agrega un ambiente 
  * @returns {state,message} Retorna un objeto donde se guarda el estado de la operacion (SUCCESS o ERROR) y un mensaje
  */
-routerEnviroment.post(pathBase + "createEnvironment", async (req, res) => {
+routerEnviroment.post(pathBase + "createEnvironment",authMiddleware, async (req, res) => {
   const { id, name, location, capacity, status, type } = req.body;
   const env = { id, name, location, capacity, status, type };
   const response = await createEnvironment(env);
@@ -69,7 +70,7 @@ routerEnviroment.get(pathBase + "getEnvironmentById", async (req, res) => {
  * Obtiene todos los ambientes con estado activo (ENVIRONMENT_STATUS=0)
  * @returns response: Array con objetos que guardan la información  de los ambientes
  */
-routerEnviroment.get(pathBase + "getEnvironmentsActived", async (req, res) => {
+routerEnviroment.get(pathBase + "getEnvironmentsActived", authMiddleware,async (req, res) => {
   const enviroments = await getAllEnvironmentsActived();
   res.send(enviroments);
 });

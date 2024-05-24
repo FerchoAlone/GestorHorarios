@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 function CompEditTeacher({ handleClose, teacher }) {
   const [name, setName] = useState(teacher.TEACHER_FIRSTNAME);
@@ -23,13 +24,13 @@ function CompEditTeacher({ handleClose, teacher }) {
   const handleSaveChanges = async (e) => {
     e.preventDefault();
     const response = await axios.post("http://localhost:3001/teacher/updateTeacher", {id:teacher.TEACHER_ID, name, lastname, typeContract: typeContract || teacher.TEACHER_CONTRACTTYPE, area, status:isActive});
-    if(response.data.state==="SUCCESS"){
-      alert(response.data.message);
-      handleClose();
-    }else{
-      alert(response.data.message);
-    }
-    console.log(teacher.TEACHER_ID, name, lastname, typeContract, area, isActive);
+    Swal.fire({
+      text: response.data.message,
+      icon: response.data.state === "SUCCESS" ? 'success' : 'error',
+      timer: 1200,
+      showConfirmButton: false
+    });
+    handleClose();
   };
 
   return (
@@ -68,7 +69,7 @@ function CompEditTeacher({ handleClose, teacher }) {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      minLength="2"
+                      minLength="4"
                     />
                   </div>
                 </div>
@@ -81,7 +82,7 @@ function CompEditTeacher({ handleClose, teacher }) {
                       value={lastname}
                       onChange={(e) => setLastname(e.target.value)}
                       required
-                      minLength="2"
+                      minLength="4"
                     />
                   </div>
                 </div>
@@ -107,7 +108,7 @@ function CompEditTeacher({ handleClose, teacher }) {
                       value={area}
                       onChange={(e) => setArea(e.target.value)}
                       required
-                      minLength="5"
+                      minLength="3"
                     />
                   </div>
                 </div>

@@ -5,12 +5,12 @@ import { authMiddleware } from "../services/serviceLogin.js";
 const routerTeacher = Router();
 const pathBase = '/teacher/';
 
-routerTeacher.get(pathBase + "getAll", async (req, res) => {
+routerTeacher.get(pathBase + "getAll",authMiddleware ,async (req, res) => {
     const response = await getAllTeachers();
     res.json(response);
 });
 
-routerTeacher.get(pathBase + "getActiveTeachers", async (req, res) => {
+routerTeacher.get(pathBase + "getActiveTeachers",authMiddleware,async (req, res) => {
     const response = await getActiveTeachers();
     res.json(response);
 });
@@ -21,7 +21,7 @@ routerTeacher.get(pathBase + "getById/:id", async (req, res) => {
     res.json(teacher);
 });
 
-routerTeacher.post(pathBase + "createTeacher", async (req, res) => {
+routerTeacher.post(pathBase + "createTeacher", authMiddleware,async (req, res) => {
     const {name,lastname,typeIdentification,identification,type,typeContract,area,status} = req.body;
     const teacher = {name,lastname,typeIdentification,identification,type,typeContract,area,status};
     const response = await createTeacher(teacher);
@@ -35,7 +35,7 @@ routerTeacher.post(pathBase + "updateTeacher", async (req, res) => {
     res.json(response);
 });
 
-routerTeacher.post(pathBase + "changeTeacherStatus", async (req, res) => {
+routerTeacher.post(pathBase + "changeTeacherStatus",authMiddleware, async (req, res) => {
     const {id,status} = req.body;
     const response = await changeTeacherStatus(id,status);
     res.json(response);

@@ -2,7 +2,6 @@ import pool from "../database.js";
 import { getTeacherById } from "./serviceTeacher.js";
 
 const verifyEnvironmentAvailability = async (timeSlot, forUpdate = false) => {
-
   const query = forUpdate
     ? "SELECT * FROM schedule WHERE ENVIRONMENT_ID = ? AND SCHEDULE_DAY = ? AND SCHEDULE_ID != ?"
     : "SELECT * FROM schedule WHERE ENVIRONMENT_ID = ? AND SCHEDULE_DAY = ?";
@@ -14,51 +13,93 @@ const verifyEnvironmentAvailability = async (timeSlot, forUpdate = false) => {
   const [response] = await pool.query(query, params);
 
   for (var i = 0; i < response.length; i++) {
-    console.log(response[i])
-    const duration =
-      parseInt(response[i].SCHEDULE_START_TIME) +
-      parseInt(response[i].SCHEDULE_DURATION);
     if (
-      parseInt(timeSlot.SCHEDULE_START_TIME) >=
-      parseInt(response[i].SCHEDULE_START_TIME) &&
-      timeSlot.SCHEDULE_START_TIME <= duration
+      parseInt(response[i].SCHEDULE_START_TIME) ==
+      parseInt(timeSlot.SCHEDULE_START_TIME)
     ) {
       return false;
     }
+
+    if (
+      parseInt(timeSlot.SCHEDULE_START_TIME) <
+        parseInt(response[i].SCHEDULE_START_TIME) &&
+      (parseInt(timeSlot.SCHEDULE_START_TIME) +
+        parseInt(timeSlot.SCHEDULE_DURATION) <
+        parseInt(response[i].SCHEDULE_START_TIME) +
+          parseInt(response[i].SCHEDULE_DURATION) ||
+        parseInt(timeSlot.SCHEDULE_START_TIME) +
+          parseInt(timeSlot.SCHEDULE_DURATION) >
+          parseInt(response[i].SCHEDULE_START_TIME) +
+            parseInt(response[i].SCHEDULE_DURATION) ||
+        parseInt(timeSlot.SCHEDULE_START_TIME) +
+          parseInt(timeSlot.SCHEDULE_DURATION) ==
+          parseInt(response[i].SCHEDULE_START_TIME) +
+            parseInt(response[i].SCHEDULE_DURATION))
+    ) {
+      return false;
+    }
+
+    if(parseInt(response[i].SCHEDULE_START_TIME)<parseInt(timeSlot.SCHEDULE_START_TIME) && parseInt(response[i].SCHEDULE_START_TIME)+parseInt(response[i].SCHEDULE_DURATION)>parseInt(timeSlot.SCHEDULE_START_TIME)){
+      return false;
+    }
+
   }
 
   return true;
 };
 
 const verifyTeacherAvailability = async (timeSlot, forUpdate = false) => {
-  for (var i = 0; i < timeSlot.SCHEDULE_DURATION; i++) {
-    var [response] = [];
-    if (forUpdate) {
-      [response] = await pool.query(
-        "SELECT * FROM schedule WHERE TEACHER_ID = ? AND SCHEDULE_DAY = ? AND SCHEDULE_START_TIME = ? AND SCHEDULE_ID != ?",
-        [
-          timeSlot.TEACHER_ID,
-          timeSlot.SCHEDULE_DAY,
-          timeSlot.SCHEDULE_START_TIME + i,
-          timeSlot.SCHEDULE_ID,
-        ]
-      );
-    } else {
-      [response] = await pool.query(
-        "SELECT * FROM schedule WHERE TEACHER_ID = ? AND SCHEDULE_DAY = ? AND SCHEDULE_START_TIME = ?",
-        [
-          timeSlot.TEACHER_ID,
-          timeSlot.SCHEDULE_DAY,
-          timeSlot.SCHEDULE_START_TIME + i,
-        ]
-      );
-    }
-    if (response.length > 0) {
+  const query = forUpdate
+    ? "SELECT * FROM schedule WHERE TEACHER_ID = ? AND SCHEDULE_DAY = ? AND SCHEDULE_ID != ?"
+    : "SELECT * FROM schedule WHERE TEACHER_ID = ? AND SCHEDULE_DAY = ?";
+
+  const params = forUpdate
+    ? [
+        timeSlot.TEACHER_ID,
+        timeSlot.SCHEDULE_DAY,
+        timeSlot.SCHEDULE_ID
+      ]
+    : [
+        timeSlot.TEACHER_ID,
+        timeSlot.SCHEDULE_DAY
+      ];
+  const [response] = await pool.query(query, params);
+  
+  for (var i = 0; i < response.length; i++) {
+    if (
+      parseInt(response[i].SCHEDULE_START_TIME) ==
+      parseInt(timeSlot.SCHEDULE_START_TIME)
+    ) {
       return false;
-    } else {
-      return true;
     }
+
+    if (
+      parseInt(timeSlot.SCHEDULE_START_TIME) <
+        parseInt(response[i].SCHEDULE_START_TIME) &&
+      (parseInt(timeSlot.SCHEDULE_START_TIME) +
+        parseInt(timeSlot.SCHEDULE_DURATION) <
+        parseInt(response[i].SCHEDULE_START_TIME) +
+          parseInt(response[i].SCHEDULE_DURATION) ||
+        parseInt(timeSlot.SCHEDULE_START_TIME) +
+          parseInt(timeSlot.SCHEDULE_DURATION) >
+          parseInt(response[i].SCHEDULE_START_TIME) +
+            parseInt(response[i].SCHEDULE_DURATION) ||
+        parseInt(timeSlot.SCHEDULE_START_TIME) +
+          parseInt(timeSlot.SCHEDULE_DURATION) ==
+          parseInt(response[i].SCHEDULE_START_TIME) +
+            parseInt(response[i].SCHEDULE_DURATION))
+    ) {
+      return false;
+    }
+
+    if(parseInt(response[i].SCHEDULE_START_TIME)<parseInt(timeSlot.SCHEDULE_START_TIME) && parseInt(response[i].SCHEDULE_START_TIME)+parseInt(response[i].SCHEDULE_DURATION)>parseInt(timeSlot.SCHEDULE_START_TIME)){
+      console.log("entro if 3");
+      return false;
+    }
+
+  
   }
+  return true;
 };
 
 const verifyHoursTeacher = async (timeSlot, forUpdate = false) => {
@@ -93,7 +134,10 @@ const verifyHoursTeacher = async (timeSlot, forUpdate = false) => {
   );
   var totalWeeklyHours = 0;
   for (var i = 0; i < weeklyData.length; i++) {
-    if (forUpdate && weeklyData[i].SCHEDULE_ID == parseInt(timeSlot.SCHEDULE_ID))
+    if (
+      forUpdate &&
+      weeklyData[i].SCHEDULE_ID == parseInt(timeSlot.SCHEDULE_ID)
+    )
       continue;
     totalWeeklyHours += parseInt(weeklyData[i].SCHEDULE_DURATION);
   }
@@ -112,6 +156,13 @@ const verifyHoursTeacher = async (timeSlot, forUpdate = false) => {
 };
 
 export const createTimeSlot = async (timeSlot) => {
+  if(parseInt(timeSlot.SCHEDULE_START_TIME) + parseInt(timeSlot.SCHEDULE_DURATION)-1 > 21){
+    return {
+      state: "ERROR",
+      message:
+        "El horario seleccionado excede el horario de cierre,seleccione un horario valido",
+    };
+  }
   //VALIDAR DISPONIBILIDAD DE AMBIENTE
   const availabilityEnvironment = await verifyEnvironmentAvailability(timeSlot);
   if (!availabilityEnvironment) {
@@ -158,6 +209,13 @@ export const createTimeSlot = async (timeSlot) => {
 };
 
 export const updateTimeSlot = async (timeSlot) => {
+  if(parseInt(timeSlot.SCHEDULE_START_TIME) + parseInt(timeSlot.SCHEDULE_DURATION)-1 > 21){
+    return {
+      state: "ERROR",
+      message:
+        "El horario seleccionado excede el horario de cierre,seleccione un horario valido",
+    };
+  }
   //VALIDAR DISPONIBILIDAD DE AMBIENTE
   const availabilityEnvironment = await verifyEnvironmentAvailability(
     timeSlot,
@@ -292,7 +350,11 @@ const sortSchedule = (timeslots) => {
         if (isfilled) return;
       });
       if (!isfilled) {
-        scheduleByHours[hoursByNum[hora]].push({ SCHEDULE_ID: -1, SCHEDULE_DAY: dia, SCHEDULE_START_TIME: hora });
+        scheduleByHours[hoursByNum[hora]].push({
+          SCHEDULE_ID: -1,
+          SCHEDULE_DAY: dia,
+          SCHEDULE_START_TIME: hora,
+        });
       }
     }
   }

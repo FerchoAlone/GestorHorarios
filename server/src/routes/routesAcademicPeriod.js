@@ -14,7 +14,7 @@ routerAcademicPeriod.get(pathBase + 'getAll',authMiddleware,async (req, res) =>{
       }
 });
 
-routerAcademicPeriod.post(pathBase + 'createAcademicPeriod', async(req, res)=>{
+routerAcademicPeriod.post(pathBase + 'createAcademicPeriod',authMiddleware, async(req, res)=>{
     const {id, datestart, duration, name, status} = req.body;
     const create = {id, datestart, duration, name, status};
     const response = await createAcademicPeriod (create);
@@ -38,14 +38,14 @@ routerAcademicPeriod.get(pathBase + 'getAcademicPeriodById', async(req, res)=>{
   }
 } );
 
-routerAcademicPeriod.post(pathBase + 'changeAcademicPeriod', async(req, res)=>{
+routerAcademicPeriod.post(pathBase + 'changeAcademicPeriod',authMiddleware, async(req, res)=>{
   const {id, status} = req.body;
   const chang = {id, status};
   const response = await changeAcademicPeriod (chang);
   res.send(response);
 });
 
-routerAcademicPeriod.get(pathBase + 'getActiveAcademicPeriod',async (req, res) =>{
+routerAcademicPeriod.get(pathBase + 'getActiveAcademicPeriod',authMiddleware,async (req, res) =>{
   try {
       const academicPeriod = await getActiveAcademicPeriod();
       res.send(academicPeriod);

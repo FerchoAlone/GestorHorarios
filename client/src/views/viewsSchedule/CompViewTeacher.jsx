@@ -1,15 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { AuthContext } from "../AuthProvider";
 import CompoInformationTimeSlot from "./CompInformationTimeSlot";
-import { useNavigate } from 'react-router-dom';
 
 
 const CompViewTeacher = () => {
 
-  const navigator = useNavigate();
   const [schedule, setSchedule] = useState({
     "08:00 ": [],
     "09:00 ": [],
@@ -58,12 +56,24 @@ const CompViewTeacher = () => {
 
   const { logout } = useContext(AuthContext);
 
-  const getAcademicPeriods = async () => {
-    const response = await axios.get(
-      "http://localhost:3001/academicPeriod/getActiveAcademicPeriod"
-    );
-    setAcademicPeriods(response.data);
-  };
+  const getAcademicPeriods = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        "http://localhost:3001/academicPeriod/getActiveAcademicPeriod", {
+        headers: {
+          'Authorization': 'bearer ' + token
+        }
+      });
+      if (response.data.state === "TOKEN") {
+        logout();
+        return;
+      }
+      setAcademicPeriods(response.data);
+    } catch (error) {
+      console.error("Error fetching periods:", error);
+    }
+  }, [logout]);
 
   const handleAcademicPeriodChange = ({ value }) => {
     setAcademicPeriod(
@@ -76,10 +86,10 @@ const CompViewTeacher = () => {
     getAcademicPeriods();
     const pageRol = "DOCENTE";
     if (localStorage.getItem("rol") !== pageRol) {
-      navigator("/login");
+      logout();
     }
 
-  }, [navigator]);
+  }, [logout,getAcademicPeriods]);
 
 
   const handleQuerySchedule = async () => {

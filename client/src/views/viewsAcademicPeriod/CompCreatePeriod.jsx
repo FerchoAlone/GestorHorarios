@@ -1,16 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { AuthContext } from "../AuthProvider";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
-const CompCreateAcademicPeriod = () => {
+const CompCreateAcademicPeriod = ({ handleClose }) => {
+  const { logout } = useContext(AuthContext);
   const [name, setName] = useState('');
   const [datestart, setDateStart] = useState('');
   const [duration, setDuration] = useState(3);
   const [dateend, setDateEnd] = useState('');
-  const [success, setSuccess] = useState('');
 
   const URI = 'http://localhost:3001/academicPeriod/createAcademicPeriod'; // Actualiza con la URI correcta
-
 
   useEffect(() => {
     if (datestart) {
@@ -20,15 +21,37 @@ const CompCreateAcademicPeriod = () => {
     }
   }, [datestart, duration]);
 
-  const store = async (e) => {
-    e.preventDefault();
-      const response = await axios.post(URI, { name, datestart, duration, dateend, status: 1 });
-      if (response.data.state === 'SUCCESS') {
-        setSuccess(response.data.message);
-      } else{
-        alert(response.data.message);
+  const store = useCallback(async (e) => {
+    try {
+      const token = localStorage.getItem("token");
+      e.preventDefault();
+      const response = await axios.post(URI, { name, datestart, duration, dateend, status: 1 }, {
+        headers: {
+          'Authorization': 'bearer ' + token
+        }
+      });
+      
+      const res = response.data;
+
+      if (res.state === "TOKEN") {
+        logout();
+        return;
+      }
+      
+      await Swal.fire({
+        text: res.message,
+        icon: res.state === "SUCCESS" ? 'success' : 'error',
+        timer: 1000,
+        showConfirmButton: false
+      });
+
+      if (res.state === "SUCCESS") {
+        handleClose();
+      }
+    } catch (error) {
+      console.error("Error creating academic period:", error);
     }
-  };
+  }, [name, datestart, duration, dateend, logout, handleClose]);
 
   return (
     <div className="card">
@@ -101,7 +124,7 @@ const CompCreateAcademicPeriod = () => {
           </div>
           <button type="submit" className="btn btn-primary w-100">Crear</button>
         </form>
-        {success && <div className="alert alert-success mt-3">{success}</div>}
+        {/* {success && <div className="alert alert-success mt-3">{success}</div>} */}
       </div>
     </div>
   );

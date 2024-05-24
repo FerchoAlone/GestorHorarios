@@ -5,7 +5,7 @@ import pool from "../database.js";
  * @returns response: Array con objetos que guardan la información  de los ambientes
  */
 export const getAllEnvironments = async () => {
-  const [response] = await pool.query("SELECT * FROM environment");
+  const [response] = await pool.query("SELECT * FROM environment ORDER BY ENVIRONMENT_NAME");
   return response;
 };
 
@@ -131,7 +131,7 @@ export const getEnvironmentByName = async (name) => {
  */
 export const getAllEnvironmentsActived = async () => {
   const [response] = await pool.query(
-    "SELECT * FROM environment WHERE ENVIRONMENT_STATUS = 1"
+    "SELECT * FROM environment WHERE ENVIRONMENT_STATUS = 1 ORDER BY ENVIRONMENT_NAME"
   );
   return response;
 };

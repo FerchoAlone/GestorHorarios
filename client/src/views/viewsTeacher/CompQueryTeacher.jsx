@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext , useCallback} from "react";
 import CompInformationTeacher from "./CompInformationTeacher";
 import CompEditTeacher from "./CompEditTeacher";
 import axios from "axios";
+import { AuthContext } from "../AuthProvider";
 
 function CompQueryTeacher() {
+  const { logout } = useContext(AuthContext);
   const [teacherSelected, setTeacherSelected] = useState({});
   const [showModalInfo, setShowModalInfo] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
@@ -52,25 +54,47 @@ function CompQueryTeacher() {
     await changeStateTeacher(id, newStatus);
   };
 
-  const getTeachersDB = async () => {
-    const url = "http://localhost:3001/teacher/getAll";
-    const response = await axios.get(url);
-    setTeachers(response.data);
-  };
-
-  const changeStateTeacher = async (id, status) => {
-    const url = "http://localhost:3001/teacher/changeTeacherStatus";
-    const response = await axios.post(url, { id, status });
-    if (response.data.state === "SUCCESS") {
-      getTeachersDB(); // Actualizar la lista de profesores después de cambiar el estado
-    } else {
-      alert(response.data.message);
+  const getTeachersDB = useCallback( async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const url = "http://localhost:3001/teacher/getAll";
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': 'bearer ' + token
+        },
+      });
+      if (response.data.state === "TOKEN") {
+        logout();
+        return;
+      }
+      setTeachers(response.data);
+    } catch (error) {
+      console.error("Error fetching teachers:", error);
     }
-  };
+  },[logout]);
+
+  const changeStateTeacher = useCallback(async (id, status) => {
+    try{
+      const token = localStorage.getItem("token");
+      const url = "http://localhost:3001/teacher/changeTeacherStatus";
+      const response = await axios.post(url, { id, status }, {
+        headers: {
+          Authorization: "bearer " + token,
+        },
+      });
+      if (response.data.state === "TOKEN") {
+        logout();
+        return;
+      }
+      getTeachersDB(); // Actualizar la lista de profesores después de cambiar el estado
+    } catch (error) {
+      console.error("Error changing teacher status:", error);
+    }
+  },[logout, getTeachersDB]);
 
   useEffect(() => {
     getTeachersDB();
-  }, []);
+  }, [getTeachersDB]);
 
   return (
     <div className="container mt-3">

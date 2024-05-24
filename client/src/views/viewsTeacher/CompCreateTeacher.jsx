@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import axios from "axios";
+import { AuthContext } from "../AuthProvider";
+import Swal from 'sweetalert2/dist/sweetalert2.js'
 
 function CompCreateTeacher() {
+  const { logout } = useContext(AuthContext)
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
   const [typeIdentification, setIdType] = useState("");
@@ -10,24 +13,38 @@ function CompCreateTeacher() {
   const [typeContract, settypeContract] = useState("");
   const [area, setArea] = useState("");
 
-  const store = async (e) => {
-    e.preventDefault();
-    const response = await axios.post("http://localhost:3001/teacher/createTeacher", {
-      name,
-      lastname,
-      typeIdentification,
-      identification,
-      type,
-      typeContract,
-      area,
-      status: 1,
-    });
-    if (response.data.state === "SUCCES") {
-      alert(response.data.message);
-    } else {
-      alert(response.data.message);
+  const store = useCallback(async (e) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post("http://localhost:3001/teacher/createTeacher", {
+        name,
+        lastname,
+        typeIdentification,
+        identification,
+        type,
+        typeContract,
+        area,
+        status: 1,
+      }, {
+        headers: {
+          'Authorization': 'bearer ' + token
+        }
+      });
+      if (response.data.state === "TOKEN") {
+        logout();
+        return;
+      }
+       Swal.fire({
+        text: response.data.message,
+        icon: response.data.status === "SUCCESS" ? 'success' : 'error',
+        timer: 1200,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error("Error fetching periods:", error);
     }
-  };
+
+  },[logout,name, lastname, typeIdentification, identification, type, typeContract, area]);
 
   return (
     <div className="container ">
@@ -41,7 +58,7 @@ function CompCreateTeacher() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              minLength="2"
+              minLength="4"
               maxLength="50"
             />
           </div>
@@ -55,7 +72,7 @@ function CompCreateTeacher() {
               value={lastname}
               onChange={(e) => setLastname(e.target.value)}
               required
-              minLength="2"
+              minLength="4"
               maxLength="50"
             />
           </div>
@@ -99,7 +116,7 @@ function CompCreateTeacher() {
               onChange={(e) => setIdentification(e.target.value)}
               required
               pattern="\d+"
-              maxLength="15"
+              maxLength="20"
             />
           </div>
         </div>
@@ -170,6 +187,7 @@ function CompCreateTeacher() {
               value={area}
               onChange={(e) => setArea(e.target.value)}
               required
+              minLength="3"
             />
           </div>
         </div>

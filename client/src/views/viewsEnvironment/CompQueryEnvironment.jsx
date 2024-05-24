@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import CompEditEnvironment from "./CompEditEnvironment";
 import CompInfoEnviorement from "./CompInfoEnviorement";
 import axios from "axios";
+import { AuthContext } from "../AuthProvider";
 
 function CompQueryEnvironment() {
+  const { logout } = useContext(AuthContext)
   const [environmentSelected, setEnvironmentSelected] = useState({});
   const [showModalInfo, setShowModalInfo] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
@@ -43,36 +45,59 @@ function CompQueryEnvironment() {
 
   const totalPages = Math.ceil(filteredEnvironments.length / itemsPerPage);
 
-  const toggleActiveStatus =async (id,status) => {
+  const toggleActiveStatus = async (id, status) => {
 
-    if(status==="1"){
-      await changeStateEnvironment(id,"0");
-    }else{
-      await changeStateEnvironment(id,"1");
-    }
-    
-  };
-
-  const getEnvironmentsDB = async () => {
-    const url="http://localhost:3001/environment/getAll";
-    const response = await axios.get(url);
-    setEnvironments(response.data);
-  };
-
-  const changeStateEnvironment = async (id, status) => {
-    const url="http://localhost:3001/environment/changeStateEnvironment";
-    const response = await axios.post(url, { id, status });
-    if (response.data.state === "SUCCESS") {
-      getEnvironmentsDB();
+    if (status === "1") {
+      await changeStateEnvironment(id, "0");
     } else {
-      alert(response.data.message);
+      await changeStateEnvironment(id, "1");
     }
-  
-  }
+
+  };
+
+  const getEnvironmentsDB = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const url = "http://localhost:3001/environment/getAll";
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': 'bearer ' + token
+        }
+      });
+      if (response.data.state === "TOKEN") {
+        logout();
+        return;
+      }
+      setEnvironments(response.data);
+    } catch (error) {
+      console.error("Error fetching periods:", error);
+    }
+  }, [logout]);
+
+  const changeStateEnvironment = useCallback(async (id, status) => {
+    try {
+      const token = localStorage.getItem("token");
+      const url = "http://localhost:3001/environment/changeStateEnvironment";
+      const response = await axios.post(url, { id, status }, {
+        headers: {
+          'Authorization': 'bearer ' + token
+        }
+      });
+      if (response.data.state === "TOKEN") {
+        logout();
+        return;
+      }
+      if (response.data.state === "SUCCESS") {
+        getEnvironmentsDB();
+      } 
+    } catch (error) {
+      console.error("Error fetching periods:", error);
+    }
+  }, [logout,getEnvironmentsDB]);
 
   useEffect(() => {
     getEnvironmentsDB();
-  }, []); 
+  }, [getEnvironmentsDB]);
 
   return (
     <div className="container mt-3">
@@ -122,13 +147,13 @@ function CompQueryEnvironment() {
                     className="btn btn-link p-0"
                     onClick={() => toggleActiveStatus(environment.ENVIRONMENT_ID, environment.ENVIRONMENT_STATUS)}
                   >
-                    {environment.ENVIRONMENT_STATUS==="1" ? (
+                    {environment.ENVIRONMENT_STATUS === "1" ? (
                       <i className="bi bi-toggle-on"></i>
                     ) : (
                       <i className="bi bi-toggle-off"></i>
                     )}
                   </button>
-                  <span>{environment.ENVIRONMENT_STATUS==="1" ? "Activo" : "Inactivo"}</span>
+                  <span>{environment.ENVIRONMENT_STATUS === "1" ? "Activo" : "Inactivo"}</span>
                 </td>
               </tr>
             ))}
@@ -142,9 +167,8 @@ function CompQueryEnvironment() {
             {Array.from({ length: totalPages }, (_, index) => (
               <li
                 key={index + 1}
-                className={`page-item ${
-                  index + 1 === currentPage ? "active" : ""
-                }`}
+                className={`page-item ${index + 1 === currentPage ? "active" : ""
+                  }`}
               >
                 <button
                   className="page-link"

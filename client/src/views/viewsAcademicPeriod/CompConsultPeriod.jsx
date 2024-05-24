@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useContext ,useCallback} from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import axios from "axios";
 
 import CompInfoAcademicPeriod from "./CompInfoAcademicPeriod";
@@ -6,7 +6,7 @@ import CompEditPeriodAcademic from "./CompEditPeriodAcademic";
 import { AuthContext } from "../AuthProvider";
 
 const CompConsultPeriod = () => {
-  const {logout}=useContext(AuthContext)
+  const { logout } = useContext(AuthContext)
   const [periodAcademic, setPeriodAcademic] = useState({});
   const [showModalInfo, setShowModalInfo] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
@@ -34,16 +34,18 @@ const CompConsultPeriod = () => {
     fetchPeriods();
   };
 
+  
+
   // Función para obtener todos los periodos académicos desde el backend
   const fetchPeriods = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3001/academicPeriod/getAll",{
-        headers:{
-          'Authorization':'bearer '+token
+      const response = await axios.get("http://localhost:3001/academicPeriod/getAll", {
+        headers: {
+          'Authorization': 'bearer ' + token
         }
       });
-      if(response.data.state==="TOKEN"){
+      if (response.data.state === "TOKEN") {
         logout();
         return;
       }
@@ -51,7 +53,7 @@ const CompConsultPeriod = () => {
     } catch (error) {
       console.error("Error fetching periods:", error);
     }
-  },[logout]);
+  }, [logout]);
 
   useEffect(() => {
     fetchPeriods(); // Llamar a fetchPeriods al montar el componente
@@ -72,6 +74,25 @@ const CompConsultPeriod = () => {
 
   const totalPages = Math.ceil(filteredPeriods.length / itemsPerPage);
 
+  const changeStateAcademicPeriod = useCallback(async (id, status) => {
+    try {
+      const token = localStorage.getItem("token");
+      const url = "http://localhost:3001/academicPeriod/changeAcademicPeriod";
+      const response = await axios.post(url, { id, status },{headers: {
+        'Authorization': 'bearer ' + token}});
+      if (response.data.state === "TOKEN") {
+        logout();
+        return;
+      }
+      if (response.data.state === "SUCCESS") {
+        fetchPeriods();
+      } 
+    } catch (error) {
+      console.error("Error fetching periods:", error);
+    }
+
+  }, [logout, fetchPeriods]);
+
   const toggleActiveStatus = async (id, status) => {
 
     if (status === "1") {
@@ -82,16 +103,6 @@ const CompConsultPeriod = () => {
 
   };
 
-  const changeStateAcademicPeriod = async (id, status) => {
-    const url = "http://localhost:3001/academicPeriod/changeAcademicPeriod";
-    const response = await axios.post(url, { id, status });
-    if (response.data.state === "SUCCESS") {
-      fetchPeriods();
-    } else {
-      alert(response.data.message);
-    }
-
-  }
 
   return (
     <div className="container mt-3">

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 function CompEditEnvironment({ handleClose, environment }) {
   const [name, setName] = useState(environment.ENVIRONMENT_NAME);
@@ -8,32 +9,47 @@ function CompEditEnvironment({ handleClose, environment }) {
   const [capacity, setCapacity] = useState(environment.ENVIRONMENT_CAPACITY);
   const [isActive, setIsActive] = useState(environment.ENVIRONMENT_STATUS);
 
-  const changeActive = (isActive) => {
-    if(isActive==="1"){
-      setIsActive("0");
-    }else{
-      setIsActive("1");
-    }
-  }
-
-  const handleTypeChange = (typeSelected) => {
-    if (type === typeSelected) {
-      setType(null); // Unselect if already selected
-    } else {
-      setType(typeSelected);
-    }
+  const changeActive = () => {
+    setIsActive(prevIsActive => (prevIsActive === "1" ? "0" : "1"));
   };
 
-  const handleSaveChanges =async (e) => {
+  const handleTypeChange = (typeSelected) => {
+    setType(typeSelected);
+  };
+
+  const handleSaveChanges = async (e) => {
     e.preventDefault();
-    const response =await axios.post("http://localhost:3001/environment/updateEnvironment", {id:environment.ENVIRONMENT_ID, name, location, type, capacity, status:isActive});
-    if(response.data.state==="SUCCESS"){
-      alert(response.data.message);
-      handleClose();
-    }else{
-      alert(response.data.message);
+    try {
+      const response = await axios.post("http://localhost:3001/environment/updateEnvironment", {
+        id: environment.ENVIRONMENT_ID,
+        name,
+        location,
+        type,
+        capacity,
+        status: isActive
+      });
+
+      const res = response.data;
+
+      await Swal.fire({
+        text: res.message,
+        icon: res.state === "SUCCESS" ? 'success' : 'error',
+        timer: 1000,
+        showConfirmButton: false
+      });
+
+      if (res.state === "SUCCESS") {
+        handleClose();
+      }
+    } catch (error) {
+      console.error("Error updating environment:", error);
+      await Swal.fire({
+        text: 'Hubo un error al actualizar el ambiente. Por favor, inténtalo de nuevo.',
+        icon: 'error',
+        timer: 1500,
+        showConfirmButton: false
+      });
     }
-    
   };
 
   return (
@@ -50,7 +66,7 @@ function CompEditEnvironment({ handleClose, environment }) {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={(e)=>handleSaveChanges(e)}>
+            <form onSubmit={handleSaveChanges}>
               <div className="mb-3">
                 <label className="form-label">Código:</label>
                 <input
@@ -99,7 +115,7 @@ function CompEditEnvironment({ handleClose, environment }) {
                   <label className="form-check form-check-inline">
                     <input
                       type="radio"
-                      className="form-check-input "
+                      className="form-check-input"
                       checked={type === "VIRTUAL"}
                       onChange={() => handleTypeChange("VIRTUAL")}
                     />
@@ -121,10 +137,10 @@ function CompEditEnvironment({ handleClose, environment }) {
               <div className="mb-3">
                 <button
                   type="button"
-                  className={`btn ${isActive==="1" ? "btn-success" : "btn-danger"}`}
-                  onClick={() => changeActive(isActive)}
+                  className={`btn ${isActive === "1" ? "btn-success" : "btn-danger"}`}
+                  onClick={changeActive}
                 >
-                  {isActive==="1" ? "ACTIVO" : "INACTIVO"}
+                  {isActive === "1" ? "ACTIVO" : "INACTIVO"}
                 </button>
               </div>
               <div className="mb-3">

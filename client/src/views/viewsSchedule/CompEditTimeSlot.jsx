@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Select from "react-select";
+import Swal from "sweetalert2";
 
 const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
-  
+  const [competences, setCompetences] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [environments, setEnvironments] = useState([]);
+
   const creating=timeSlot.SCHEDULE_ID===-1? true : false;
   const [academicPeriod] = useState(iniPeriod.PERIOD_NAME);
   const [program] = useState(initProgram.PROGRAM_NAME);
@@ -21,31 +25,30 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
   });
   const [duration, setDuration] = useState(timeSlot.SCHEDULE_DURATION);
 
-  const [competences, setCompetences] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [environments, setEnvironments] = useState([]);
-
+  
+  const token = localStorage.getItem("token");
   const getCompetences = useCallback(async () => {
     const id = initProgram.PROGRAM_ID;
+    
     const response = await axios.get(
       `http://localhost:3001/apiProgramCompetences/getCompetencesByProgram/${id}`
-    );
+    ,{headers: {Authorization: `Bearer ${token}`}});
     setCompetences(response.data["1"]);
-  }, [initProgram.PROGRAM_ID]);
+  }, [initProgram.PROGRAM_ID,token]);
 
   const getTeachers = useCallback(async () => {
     const response = await axios.get(
       "http://localhost:3001/teacher/getActiveTeachers"
-    );
+    ,{headers: {Authorization: `Bearer ${token}`}});
     setTeachers(response.data);
-  }, []);
+  }, [token]);
 
   const getEnvironments = useCallback(async () => {
     const response = await axios.get(
       "http://localhost:3001/environment/getEnvironmentsActived"
-    );
+    ,{headers: {Authorization: `Bearer ${token}`}});
     setEnvironments(response.data);
-  }, []);
+  }, [token]);
 
   const handleCompetenceChange = ({ value }) => {
     setCompetence(
@@ -75,14 +78,26 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
       SCHEDULE_START_TIME:timeSlot.SCHEDULE_START_TIME, 
       SCHEDULE_DURATION:duration
     };
-    console.log(data);
     if(!data.COMPETENCE_ID || !data.ENVIRONMENT_ID===-1 || !data.TEACHER_ID===-1 || !data.PROGRAM_ID || !data.PERIOD_ID){
      alert("Por favor complete todos los campos");
      return;
     }
     const response = await axios.post("http://localhost:3001/schedule/createTimeSlot", data);
-    alert(response.data.message);
-    handleClose();
+    if(response.data.state==="SUCCESS"){
+      Swal.fire({
+        text:response.data.message,
+        icon: "success",
+        timer: 1500
+      });
+      handleClose();
+    }else{
+      Swal.fire({
+        text:response.data.message,
+        icon: "error",
+        timer: 1500
+      });
+      
+    } 
   }
   const updateSchedule = async () => {
     const data = {
@@ -96,9 +111,29 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
       SCHEDULE_DURATION:duration,
       SCHEDULE_ID:timeSlot.SCHEDULE_ID
     };
+    const res= await Swal.fire({
+      text:"¿Está seguro que desea actualizar la franja horaria?",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+    });
+    if(!res.isConfirmed)return
     const response =await axios.post("http://localhost:3001/schedule/updateTimeSlot", data);
-    alert(response.data.message);
-    handleClose();
+    if(response.data.state==="SUCCESS"){
+      Swal.fire({
+        text:response.data.message,
+        icon: "success",
+        timer: 1500
+      });
+      handleClose();
+    }else{
+      Swal.fire({
+        text:response.data.message,
+        icon: "error",
+        timer: 1500
+      });
+    }
+    
   }
 
   const handleSave = (e) => {
@@ -111,9 +146,29 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
   };
 
   const handleDelete = async () => {
+    const res = await Swal.fire({
+      text:"¿Está seguro que desea eliminar la franja horaria?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+    });
+    if(!res.isConfirmed)return;
     const response = await axios.delete('http://localhost:3001/schedule/deleteTimeSlot/'+timeSlot.SCHEDULE_ID);
-    alert(response.data.message);
-    handleClose();
+    if(response.data.state==="SUCCESS"){
+      Swal.fire({
+        text:response.data.message,
+        icon: "success",
+        timer: 1500
+      });
+      handleClose();
+    }else{
+      Swal.fire({
+        text:response.data.message,
+        icon: "error",
+        timer: 1500
+      });
+    
+    }
   }
 
   useEffect(() => {
@@ -161,15 +216,14 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
                 <Select
                   placeholder="Seleccionar docente"
                   defaultValue={environment}
-                  options={environments.map((environment) => {
+                  options={Array.isArray(environments) ? environments.map((environment) => {
                     return {
                       value: environment.ENVIRONMENT_ID,
-                      label:
-                      environment.ENVIRONMENT_NAME +
+                      label: environment.ENVIRONMENT_NAME +
                         " - " +
                         environment.ENVIRONMENT_LOCATION,
                     };
-                  })}
+                  }) : []}
                   onChange={handleEnvironmentChange}
                 ></Select>
               </div>
@@ -178,15 +232,12 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
                 <Select
                   placeholder="Seleccionar docente"
                   defaultValue={teacher}
-                  options={teachers.map((teacher) => {
+                  options={Array.isArray(teachers) ? teachers.map((teacher) => {
                     return {
                       value: teacher.TEACHER_ID,
-                      label:
-                        teacher.TEACHER_LASTNAME +
-                        " " +
-                        teacher.TEACHER_FIRSTNAME,
+                      label: teacher.TEACHER_LASTNAME + " " + teacher.TEACHER_FIRSTNAME,
                     };
-                  })}
+                  }) : []}
                   onChange={handleTeacherChange}
                 ></Select>
               </div>
@@ -198,12 +249,12 @@ const CompEditTimeSlot = ({ handleClose, timeSlot, initProgram ,iniPeriod}) => {
                     value: competence.COMPETENCE_ID,
                     label: competence.COMPETENCE_NAME,
                   }}
-                  options={competences.map((competence) => {
+                  options={Array.isArray(competences) ? competences.map((competence) => {
                     return {
                       value: competence.COMPETENCE_ID,
                       label: competence.COMPETENCE_NAME,
                     };
-                  })}
+                  }) : []}                  
                   onChange={handleCompetenceChange}
                 ></Select>
               </div>

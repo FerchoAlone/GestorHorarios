@@ -1,7 +1,7 @@
 import pool from '../database.js';
 
 export const getAllAcademicPeriod = async() =>{
-    const [response] = await pool.query('SELECT * FROM ACADEMIC_PERIOD')
+    const [response] = await pool.query('SELECT * FROM ACADEMIC_PERIOD ORDER BY PERIOD_NAME')
     return response;
 }
 
@@ -54,6 +54,6 @@ export const changeAcademicPeriod = async (chang)=>{
 };
 
 export const getActiveAcademicPeriod = async()=>{
-    const [response] = await pool.query('SELECT * FROM ACADEMIC_PERIOD WHERE PERIOD_STATUS = 1')
+    const [response] = await pool.query('SELECT * FROM ACADEMIC_PERIOD WHERE PERIOD_STATUS = 1 ORDER BY PERIOD_NAME')
     return response;
 }

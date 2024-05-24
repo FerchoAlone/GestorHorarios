@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import Select from "react-select";
 import CompEditTimeSlot from "./CompEditTimeSlot";
+import { AuthContext } from "../AuthProvider";
 
 function CompScheduleCoor() {
+  const { logout } = useContext(AuthContext);
   const [schedule, setSchedule] = useState({
     "07:00 ": [],
     "08:00 ": [],
@@ -22,20 +24,46 @@ function CompScheduleCoor() {
     "20:00 ": [],
     "21:00 ": [],
   });
-  const scheduleHours=["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"];
-  const [academicPeriods, setAcademicPeriods] = useState([  ]);
+  const scheduleHours = [
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+    "21:00",
+  ];
+  const [academicPeriods, setAcademicPeriods] = useState([]);
   const [academicPeriod, setAcademicPeriod] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [program, setProgram] = useState([]);
   const [environments, setEnvironments] = useState([]);
   const [environment, setEnvironment] = useState([]);
 
-  const getAcademicPeriods = async () => {
+  const getAcademicPeriods = useCallback(async () => {
+    const token = localStorage.getItem("token");
     const response = await axios.get(
-      "http://localhost:3001/academicPeriod/getActiveAcademicPeriod"
+      "http://localhost:3001/academicPeriod/getActiveAcademicPeriod",
+      {
+        headers: {
+          Authorization: "bearer " + token,
+        },
+      }
     );
+    if (response.data.state === "TOKEN") {
+      logout();
+      return;
+    }
     setAcademicPeriods(response.data);
-  };
+  }, [logout]);
 
   const handleAcademicPeriodChange = ({ value }) => {
     setAcademicPeriod(
@@ -45,23 +73,41 @@ function CompScheduleCoor() {
     );
   };
 
-  const getPrograms = async () => {
+  const getPrograms =useCallback(async () => {
+    const token = localStorage.getItem("token");
     const response = await axios.get(
       "http://localhost:3001/apiProgramCompetences/getAllPrograms"
-    );
+    ,{
+      headers: {
+        Authorization: "bearer " + token,
+      },
+    });
+    if (response.data.state === "TOKEN") {
+      logout();
+      return;
+    }
     setPrograms(response.data);
-  };
+  },[logout]);
 
   const handleProgramsChange = ({ value }) => {
     setProgram(programs.find((program) => program.PROGRAM_ID === value));
   };
 
-  const getEnviroments = async () => {
+  const getEnviroments = useCallback(async () => {
+    const token = localStorage.getItem("token");
     const response = await axios.get(
       "http://localhost:3001/environment/getEnvironmentsActived"
-    );
+    ,{
+      headers: {
+        Authorization: "bearer " + token,
+      },
+    });
+    if (response.data.state === "TOKEN") {
+      logout();
+      return;
+    }
     setEnvironments(response.data);
-  };
+  },[logout]);
 
   const handleEnviromentChange = ({ value }) => {
     setEnvironment(
@@ -89,7 +135,7 @@ function CompScheduleCoor() {
     getAcademicPeriods();
     getPrograms();
     getEnviroments();
-  }, []);
+  }, [getAcademicPeriods,getPrograms,getEnviroments]);
 
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [timeSlotSelected, setTimeSlotSelected] = useState({});
@@ -242,7 +288,11 @@ function CompScheduleCoor() {
                         onMouseOut={(e) =>
                           (e.currentTarget.style.backgroundColor = "")
                         }
-                        key={activity.SCHEDULE_DAY+'-'+activity.SCHEDULE_START_TIME}
+                        key={
+                          activity.SCHEDULE_DAY +
+                          "-" +
+                          activity.SCHEDULE_START_TIME
+                        }
                         onClick={() => handleShowModalEdit(activity)}
                       >
                         {activity.COMPETENCE_NAME} {activity.ENVIRONMENT_NAME}
@@ -268,9 +318,4 @@ function CompScheduleCoor() {
 }
 
 export default CompScheduleCoor;
-/* <td
-  style={{ cursor: "pointer" }}
-  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "lightblue")}
-  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "")}
-  onClick={() => handleShowModalEdit(null)}
-></td>; */
+

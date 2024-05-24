@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 function CompEditPeriodAcademic({ handleClose, periodEdit }) {
   const [name, setName] = useState(periodEdit.PERIOD_NAME);
@@ -9,25 +10,41 @@ function CompEditPeriodAcademic({ handleClose, periodEdit }) {
   const [dateend, setDateEnd] = useState('');
 
   const changeActive = (active) => {
-    if (active === "1") {
-      setIsActive("0");
-    } else {
-      setIsActive("1");
-    }
-  }
-  const handleSaveChanges = async (e) => {
-    e.preventDefault();
-    const response = await axios.post("http://localhost:3001/academicPeriod/updateAcademicPeriod", { id: periodEdit.PERIOD_ID, datestart, duration, name, status: isActive });
-    if (response.data.state === "SUCCESS") {
-      alert(response.data.message);
-      handleClose();
-
-    } else {
-      alert(response.data.message);
-    }
+    setIsActive(active === "1" ? "0" : "1");
   };
 
+  const handleSaveChanges = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:3001/academicPeriod/updateAcademicPeriod", {
+        id: periodEdit.PERIOD_ID,
+        datestart,
+        duration,
+        name,
+        status: isActive
+      });
 
+      const res = response.data;
+      await Swal.fire({
+        text: res.message,
+        icon: res.state === "SUCCESS" ? 'success' : 'error',
+        timer: 1000,
+        showConfirmButton: false
+      });
+
+      if (res.state === "SUCCESS") {
+        handleClose();
+      }
+    } catch (error) {
+      console.error("There was an error updating the academic period!", error);
+      await Swal.fire({
+        text: 'Hubo un error al actualizar el período académico. Por favor, inténtalo de nuevo.',
+        icon: 'error',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+  };
 
   useEffect(() => {
     if (datestart) {
@@ -51,7 +68,7 @@ function CompEditPeriodAcademic({ handleClose, periodEdit }) {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={(e) => handleSaveChanges(e)}>
+            <form onSubmit={handleSaveChanges}>
               <div className="mb-3">
                 <label className="form-label">Identificación:</label>
                 <input
@@ -113,7 +130,6 @@ function CompEditPeriodAcademic({ handleClose, periodEdit }) {
                   </div>
                 </div>
               </div>
-
               <div className="mb-3">
                 <label className="form-label" htmlFor="dateend">Fecha Fin</label>
                 <input
@@ -133,7 +149,6 @@ function CompEditPeriodAcademic({ handleClose, periodEdit }) {
                   {isActive === "1" ? "ACTIVO" : "INACTIVO"}
                 </button>
               </div>
-
               <div className="mb-3">
                 <button
                   type="submit"

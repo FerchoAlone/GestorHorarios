@@ -1,30 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import axios from "axios";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { AuthContext } from "../AuthProvider";
+
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 
-const CompCreateEnvironment = () => {
+const CompCreateEnvironment = (handleClose) => {
+
+    const { logout } = useContext(AuthContext)
     const [id, setId] = useState('');
     const [name, setName] = useState('');
     const [location, setLocation] = useState('');
     const [type, setType] = useState('PRESENCIAL'); // Corregido el nombre de la variable
     const [capacity, setCapacity] = useState('');
 
-    const store = async (e) => {
-        e.preventDefault();
-        const response = await axios.post("http://localhost:3001/environment/createEnvironment", {id, name, location,capacity,type,status:1 });
-        if(response.data.state==="SUCCES"){
-            alert(response.data.message);
-        }else{
-            alert(response.data.message);
+    const store = useCallback(async (e) => {
+        try {
+            const token = localStorage.getItem("token");
+            e.preventDefault();
+            const response = await axios.post("http://localhost:3001/environment/createEnvironment", { id, name, location, capacity, type, status: 1 }, {
+                headers: {
+                    'Authorization': 'bearer ' + token
+                }
+            });
+            const res = response.data;
+
+            if (res.state === "TOKEN") {
+                logout();
+                return;
+            }
+            await Swal.fire({
+                text: res.message,
+                icon: res.state === "SUCCESS" ? 'success' : 'error',
+                timer: 1000,
+                showConfirmButton: false
+            });
+            if (res.state === "SUCCESS") {
+                handleClose();
+            }
+        } catch (error) {
+            console.error("Error fetching periods:", error);
         }
-            
-    };
+
+    }, [id, name, location, capacity, type, logout, handleClose]);
+
 
     return (
         <div className="card">
             <div className="card-body">
-                <form onSubmit={(e)=>store(e)}>
+                <form onSubmit={(e) => store(e)}>
                     <div className="mb-3">
                         <label className="form-label" htmlFor="code">Código</label>
                         <input
