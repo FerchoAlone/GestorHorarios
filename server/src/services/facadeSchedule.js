@@ -119,7 +119,7 @@ const verifyHoursTeacher = async (timeSlot, forUpdate = false) => {
   }
   if (
     totalDailyHours + parseInt(timeSlot.SCHEDULE_DURATION) >
-    (teacher.TEACHER_CONTRACTTYPE === "PLT" ? 8 : 10)
+    (teacher.TEACHER_CONTRACTTYPE === "PT" ? 8 : 10)
   ) {
     return {
       state: "ERROR",
@@ -143,7 +143,7 @@ const verifyHoursTeacher = async (timeSlot, forUpdate = false) => {
   }
   if (
     totalWeeklyHours + parseInt(timeSlot.SCHEDULE_DURATION) >
-    (teacher.TEACHER_CONTRACTTYPE === "PLT" ? 32 : 40)
+    (teacher.TEACHER_CONTRACTTYPE === "PT" ? 32 : 40)
   ) {
     return {
       state: "ERROR",
