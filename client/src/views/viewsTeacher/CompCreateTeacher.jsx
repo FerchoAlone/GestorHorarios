@@ -3,7 +3,7 @@ import axios from "axios";
 import { AuthContext } from "../AuthProvider";
 import Swal from 'sweetalert2/dist/sweetalert2.js'
 
-function CompCreateTeacher() {
+const CompCreateTeacher = (handleClose) => {
   const { logout } = useContext(AuthContext)
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
@@ -16,6 +16,7 @@ function CompCreateTeacher() {
   const store = useCallback(async (e) => {
     try {
       const token = localStorage.getItem("token");
+      e.preventDefault();
       const response = await axios.post("http://localhost:3001/teacher/createTeacher", {
         name,
         lastname,
@@ -30,21 +31,23 @@ function CompCreateTeacher() {
           'Authorization': 'bearer ' + token
         }
       });
-      if (response.data.state === "TOKEN") {
+      if (response.data.status === "TOKEN") {
         logout();
         return;
       }
-       Swal.fire({
+      await Swal.fire({
         text: response.data.message,
         icon: response.data.status === "SUCCESS" ? 'success' : 'error',
         timer: 1200,
         showConfirmButton: false
       });
+      if (response.data.status === "SUCCESS") {
+        handleClose();
+      }
     } catch (error) {
       console.error("Error fetching periods:", error);
     }
-
-  },[logout,name, lastname, typeIdentification, identification, type, typeContract, area]);
+  }, [name, lastname, typeIdentification, identification, type, typeContract, area, logout, handleClose]);
 
   return (
     <div className="container ">
@@ -116,7 +119,7 @@ function CompCreateTeacher() {
               onChange={(e) => setIdentification(e.target.value)}
               required
               pattern="\d+"
-              maxLength="20"
+              maxLength="10"
             />
           </div>
         </div>
