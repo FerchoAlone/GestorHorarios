@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthProvider";
 
 function CompHomeCoordinator() {
+  const navigator=useNavigate();
   const pageRol = "COORDINADOR";
   const { logout } = useContext(AuthContext);
   if (localStorage.getItem("rol") !== pageRol) {
