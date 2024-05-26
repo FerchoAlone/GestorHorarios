@@ -2,7 +2,11 @@ import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "./AuthProvider";
 
 function Management({ name, compCreate, compQuery }) {
+  const pageRol = "COORDINADOR";
   const { logout } = useContext(AuthContext);
+  if (localStorage.getItem("rol") !== pageRol) {
+    logout();
+  }
   const [isShowCreate, setisShowCreate] = useState(false);
   const [isShowQuery, setisShowQuery] = useState(true);
   const showCreate = () => {
